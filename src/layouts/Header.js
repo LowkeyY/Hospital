@@ -41,45 +41,13 @@ class HeaderView extends Component {
     return collapsed ? 'calc(100% - 80px)' : 'calc(100% - 256px)';
   };
 
-  handleNoticeClear = type => {
-    message.success(
-      `${formatMessage({ id: 'component.noticeIcon.cleared' })} ${formatMessage({
-        id: `component.globalHeader.${type}`,
-      })}`
-    );
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'global/clearNotices',
-      payload: type,
-    });
-  };
-
   handleMenuClick = ({ key }) => {
     const { dispatch } = this.props;
-    if (key === 'userCenter') {
-      router.push('/account/center');
-      return;
-    }
-    if (key === 'triggerError') {
-      router.push('/exception/trigger');
-      return;
-    }
-    if (key === 'userinfo') {
-      router.push('/account/settings/base');
-      return;
+    if (key === 'setting') {
     }
     if (key === 'logout') {
       dispatch({
         type: 'login/logout',
-      });
-    }
-  };
-
-  handleNoticeVisibleChange = visible => {
-    if (visible) {
-      const { dispatch } = this.props;
-      dispatch({
-        type: 'global/fetchNotices',
       });
     }
   };
@@ -126,17 +94,13 @@ class HeaderView extends Component {
             theme={navTheme}
             mode="horizontal"
             onCollapse={handleMenuCollapse}
-            onNoticeClear={this.handleNoticeClear}
             onMenuClick={this.handleMenuClick}
-            onNoticeVisibleChange={this.handleNoticeVisibleChange}
             {...this.props}
           />
         ) : (
           <GlobalHeader
             onCollapse={handleMenuCollapse}
-            onNoticeClear={this.handleNoticeClear}
             onMenuClick={this.handleMenuClick}
-            onNoticeVisibleChange={this.handleNoticeVisibleChange}
             {...this.props}
           />
         )}
@@ -150,11 +114,8 @@ class HeaderView extends Component {
   }
 }
 
-export default connect(({ user, global, setting, loading }) => ({
-  currentUser: user.currentUser,
+export default connect(({ login, global, setting }) => ({
+  currentUser: login.currentUser,
   collapsed: global.collapsed,
-  fetchingMoreNotices: loading.effects['global/fetchMoreNotices'],
-  fetchingNotices: loading.effects['global/fetchNotices'],
-  notices: global.notices,
   setting,
 }))(HeaderView);

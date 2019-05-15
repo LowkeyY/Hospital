@@ -1,7 +1,7 @@
 import { urlToList } from './pathTools';
 
 describe('test urlToList', () => {
-  it('A path', () => {
+  it('AccessManage path', () => {
     expect(urlToList('/userinfo')).toEqual(['/userinfo']);
   });
   it('Secondary path', () => {

@@ -6,6 +6,8 @@
   height: 100vh;
   overflow: auto;
   background: @layout-body-background;
+  background: url('../../public/deskBg.png') center center !important;
+  background-size: cover;
 }
 
 .lang {
@@ -19,7 +21,10 @@
 }
 
 .content {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  justify-content: center;
   padding: 32px 0;
 }
 

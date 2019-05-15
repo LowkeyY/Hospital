@@ -9,6 +9,7 @@ export default class GlobalHeader extends PureComponent {
   componentWillUnmount() {
     this.triggerResizeEvent.cancel();
   }
+
   /* eslint-disable*/
   @Debounce(600)
   triggerResizeEvent() {
@@ -17,13 +18,15 @@ export default class GlobalHeader extends PureComponent {
     event.initEvent('resize', true, false);
     window.dispatchEvent(event);
   }
+
   toggle = () => {
     const { collapsed, onCollapse } = this.props;
     onCollapse(!collapsed);
     this.triggerResizeEvent();
   };
+
   render() {
-    const { collapsed, isMobile, logo } = this.props;
+    const { collapsed, isMobile, logo, isDesktop = false } = this.props;
     return (
       <div className={styles.header}>
         {isMobile && (
@@ -31,9 +34,13 @@ export default class GlobalHeader extends PureComponent {
             <img src={logo} alt="logo" width="32" />
           </Link>
         )}
-        <span className={styles.trigger} onClick={this.toggle}>
-          <Icon type={collapsed ? 'menu-unfold' : 'menu-fold'} />
-        </span>
+        {!isDesktop ? (
+          <span className={styles.trigger} onClick={this.toggle}>
+            <Icon type={collapsed ? 'menu-unfold' : 'menu-fold'} />
+          </span>
+        ) : (
+          ''
+        )}
         <RightContent {...this.props} />
       </div>
     );

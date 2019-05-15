@@ -30,7 +30,7 @@ export default {
   'app.settings.security.phone-description': 'Telefone vinculado',
   'app.settings.security.question': 'Pergunta de Segurança',
   'app.settings.security.question-description':
-    'A pergunta de segurança não está definida e a política de segurança pode proteger efetivamente a segurança da conta',
+    'AccessManage pergunta de segurança não está definida e a política de segurança pode proteger efetivamente a segurança da conta',
   'app.settings.security.email': 'Email de Backup',
   'app.settings.security.email-description': 'Email vinculado',
   'app.settings.security.mfa': 'Dispositivo MFA',
@@ -54,7 +54,7 @@ export default {
     'Mensagens de sistema serão notificadas na forma de uma estação de letra',
   'app.settings.notification.todo': 'Notificação de To-do',
   'app.settings.notification.todo-description':
-    'A lista de to-do será notificada na forma de uma estação de letra',
+    'AccessManage lista de to-do será notificada na forma de uma estação de letra',
   'app.settings.open': 'Aberto',
   'app.settings.close': 'Fechado',
 };

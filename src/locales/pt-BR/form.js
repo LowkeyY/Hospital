@@ -33,7 +33,7 @@ export default {
   'form.public.radio.partially-public': 'Parcialmente publico',
   'form.public.radio.private': 'Privado',
   'form.publicUsers.placeholder': 'Aberto para',
-  'form.publicUsers.option.A': 'Colega A',
+  'form.publicUsers.option.A': 'Colega AccessManage',
   'form.publicUsers.option.B': 'Colega B',
   'form.publicUsers.option.C': 'Colega C',
 };

@@ -225,30 +225,30 @@ class SettingDrawer extends Component {
             />
           </Body>
           <Divider />
-          <CopyToClipboard
-            text={JSON.stringify(omit(setting, ['colorWeak']), null, 2)}
-            onCopy={() => message.success(formatMessage({ id: 'app.setting.copyinfo' }))}
-          >
-            <Button block icon="copy">
-              {formatMessage({ id: 'app.setting.copy' })}
-            </Button>
-          </CopyToClipboard>
-          <Alert
-            type="warning"
-            className={styles.productionHint}
-            message={
-              <div>
-                {formatMessage({ id: 'app.setting.production.hint' })}{' '}
-                <a
-                  href="https://u.ant.design/pro-v2-default-settings"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  src/defaultSettings.js
-                </a>
-              </div>
-            }
-          />
+          {/*<CopyToClipboard*/}
+          {/*text={JSON.stringify(omit(setting, ['colorWeak']), null, 2)}*/}
+          {/*onCopy={() => message.success(formatMessage({ id: 'app.setting.copyinfo' }))}*/}
+          {/*>*/}
+          {/*<Button block icon="copy">*/}
+          {/*{formatMessage({ id: 'app.setting.copy' })}*/}
+          {/*</Button>*/}
+          {/*</CopyToClipboard>*/}
+          {/*<Alert*/}
+          {/*type="warning"*/}
+          {/*className={styles.productionHint}*/}
+          {/*message={*/}
+          {/*<div>*/}
+          {/*{formatMessage({ id: 'app.setting.production.hint' })}{' '}*/}
+          {/*<a*/}
+          {/*href="https://u.ant.design/pro-v2-default-settings"*/}
+          {/*target="_blank"*/}
+          {/*rel="noopener noreferrer"*/}
+          {/*>*/}
+          {/*src/defaultSettings.js*/}
+          {/*</a>*/}
+          {/*</div>*/}
+          {/*}*/}
+          {/*/>*/}
         </div>
       </Drawer>
     );

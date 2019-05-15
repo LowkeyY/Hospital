@@ -1,6 +1,7 @@
 import fetch from 'dva/fetch';
 import { notification } from 'antd';
 import router from 'umi/router';
+import { parse, stringify } from 'qs';
 import hash from 'hash.js';
 import { isAntdPro } from './utils';
 
@@ -11,7 +12,7 @@ const codeMessage = {
   204: '删除数据成功。',
   400: '发出的请求有错误，服务器没有进行新建或修改数据的操作。',
   401: '用户没有权限（令牌、用户名、密码错误）。',
-  403: '用户得到授权，但是访问是被禁止的。',
+  403: '用户登陆超时，请重新登陆。',
   404: '发出的请求针对的是不存在的记录，服务器没有进行操作。',
   406: '请求的格式不可得。',
   410: '请求的资源被永久删除，且不会再得到的。',
@@ -26,11 +27,18 @@ const checkStatus = response => {
   if (response.status >= 200 && response.status < 300) {
     return response;
   }
+  if (response.status === 403) {
+    notification.error({
+      message: '登陆过期',
+      description: '请重新登陆',
+    });
+  } else {
+    notification.error({
+      message: `请求错误 ${response.status}: ${response.url}`,
+      description: response.msg,
+    });
+  }
   const errortext = codeMessage[response.status] || response.statusText;
-  notification.error({
-    message: `请求错误 ${response.status}: ${response.url}`,
-    description: errortext,
-  });
   const error = new Error(errortext);
   error.name = response.status;
   error.response = response;
@@ -88,12 +96,13 @@ export default function request(url, option) {
     newOptions.method === 'DELETE'
   ) {
     if (!(newOptions.body instanceof FormData)) {
+      //需要修改默认请求头
       newOptions.headers = {
         Accept: 'application/json',
-        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
         ...newOptions.headers,
       };
-      newOptions.body = JSON.stringify(newOptions.body);
+      newOptions.body = stringify(newOptions.body);
     } else {
       // newOptions.body is FormData
       newOptions.headers = {
@@ -118,38 +127,25 @@ export default function request(url, option) {
       sessionStorage.removeItem(`${hashcode}:timestamp`);
     }
   }
-  return fetch(url, newOptions)
-    .then(checkStatus)
-    .then(response => cachedSave(response, hashcode))
-    .then(response => {
-      // DELETE and 204 do not return data by default
-      // using .json will report an error.
-      if (newOptions.method === 'DELETE' || response.status === 204) {
-        return response.text();
-      }
-      return response.json();
-    })
-    .catch(e => {
-      const status = e.name;
-      if (status === 401) {
-        // @HACK
-        /* eslint-disable no-underscore-dangle */
-        window.g_app._store.dispatch({
-          type: 'login/logout',
-        });
-        return;
-      }
-      // environment should not be used
-      if (status === 403) {
-        router.push('/exception/403');
-        return;
-      }
-      if (status <= 504 && status >= 500) {
-        router.push('/exception/500');
-        return;
-      }
-      if (status >= 404 && status < 422) {
-        router.push('/exception/404');
-      }
-    });
+
+  return (
+    fetch(url, newOptions)
+      .then(checkStatus)
+      // .then(response => cachedSave(response, hashcode))
+      .then(response => {
+        // DELETE and 204 do not return data by default
+        // using .json will report an error.
+        if (newOptions.method === 'DELETE' || response.status === 204) {
+          return response.text();
+        }
+        return response.json();
+      })
+      .catch(e => {
+        const status = e.name;
+        if (status === 403) {
+          router.push('/user/login');
+          return;
+        }
+      })
+  );
 }

@@ -1,41 +1,24 @@
 import memoizeOne from 'memoize-one';
 import isEqual from 'lodash/isEqual';
 import { formatMessage } from 'umi-plugin-react/locale';
-import Authorized from '@/utils/Authorized';
-import { menu } from '../defaultSettings';
+import { queryMenus } from '@/services/api';
 
-const { check } = Authorized;
-
-// Conversion router to menu.
-function formatter(data, parentAuthority, parentName) {
+function formatter(data) {
   if (!data) {
     return undefined;
   }
   return data
     .map(item => {
-      if (!item.name || !item.path) {
+      if (!item.menuName || !item.menuEntrance) {
         return null;
       }
-
-      let locale = 'menu';
-      if (parentName && parentName !== '/') {
-        locale = `${parentName}.${item.name}`;
-      } else {
-        locale = `menu.${item.name}`;
-      }
-      // if enableMenuLocale use item.name,
-      // close menu international
-      const name = menu.disableLocal
-        ? item.name
-        : formatMessage({ id: locale, defaultMessage: item.name });
       const result = {
-        ...item,
-        name,
-        locale,
-        authority: item.authority || parentAuthority,
+        name: item.menuName,
+        path: item.menuEntrance,
+        icon: item.menuIcon,
       };
-      if (item.routes) {
-        const children = formatter(item.routes, item.authority, locale);
+      if (item.children) {
+        const children = formatter(item.children);
         // Reduce memory usage
         result.children = children;
       }
@@ -61,18 +44,6 @@ const getSubMenu = item => {
   return item;
 };
 
-/**
- * filter menuData
- */
-const filterMenuData = menuData => {
-  if (!menuData) {
-    return [];
-  }
-  return menuData
-    .filter(item => item.name && !item.hideInMenu)
-    .map(item => check(item.authority, getSubMenu(item)))
-    .filter(item => item);
-};
 /**
  * 获取面包屑映射
  * @param {Object} menuData 菜单配置
@@ -103,20 +74,21 @@ export default {
 
   state: {
     menuData: [],
-    routerData: [],
     breadcrumbNameMap: {},
   },
 
   effects: {
-    *getMenuData({ payload }, { put }) {
-      const { routes, authority, path } = payload;
-      const originalMenuData = memoizeOneFormatter(routes, authority, path);
-      const menuData = filterMenuData(originalMenuData);
-      const breadcrumbNameMap = memoizeOneGetBreadcrumbNameMap(originalMenuData);
-      yield put({
-        type: 'save',
-        payload: { menuData, breadcrumbNameMap, routerData: routes },
-      });
+    *getMenuData(_, { call, put }) {
+      const response = yield call(queryMenus);
+      if (response.success) {
+        const originalMenuData = memoizeOneFormatter(response.data);
+        const menuData = originalMenuData;
+        const breadcrumbNameMap = memoizeOneGetBreadcrumbNameMap(originalMenuData);
+        yield put({
+          type: 'save',
+          payload: { menuData, breadcrumbNameMap },
+        });
+      }
     },
   },
 

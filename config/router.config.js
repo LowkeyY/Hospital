@@ -6,166 +6,267 @@ export default [
     routes: [
       { path: '/user', redirect: '/user/login' },
       { path: '/user/login', name: 'login', component: './User/Login' },
-      { path: '/user/register', name: 'register', component: './User/Register' },
-      {
-        path: '/user/register-result',
-        name: 'register.result',
-        component: './User/RegisterResult',
-      },
       {
         component: '404',
       },
     ],
   },
-  // app
+
+  //后台管理
   {
-    path: '/',
+    path: '/backstage',
     component: '../layouts/BasicLayout',
-    Routes: ['src/pages/Authorized'],
     routes: [
-      // dashboard
-      { path: '/', redirect: '/dashboard/analysis', authority: ['admin', 'user'] },
       {
-        path: '/dashboard',
-        name: 'dashboard',
-        icon: 'dashboard',
+        path: '/backstage/access',
         routes: [
+          //权限管理
+          { path: '/backstage/access', redirect: '/backstage/access/menu' },
           {
-            path: '/dashboard/analysis',
-            name: 'analysis',
-            component: './Dashboard/Analysis',
+            path: '/backstage/access/menu',
+            component: './AccessManage/MenuManage',
           },
           {
-            path: '/dashboard/monitor',
-            name: 'monitor',
-            component: './Dashboard/Monitor',
-          },
-          {
-            path: '/dashboard/workplace',
-            name: 'workplace',
-            component: './Dashboard/Workplace',
+            path: '/backstage/access/role',
+            name: 'role',
+            component: './AccessManage/RoleManage',
           },
         ],
       },
-      // forms
+      //基本信息维护
       {
-        path: '/form',
-        icon: 'form',
-        name: 'form',
+        name: '基本信息维护',
+        path: '/backstage/info-manage',
         routes: [
+          { path: '/backstage/info-manage', redirect: '/backstage/info-manage/salesman' },
           {
-            path: '/form/basic-form',
-            name: 'basicform',
-            component: './Forms/BasicForm',
+            path: '/backstage/info-manage/salesman',
+            component: './BaseInfoManage/SalesmanInfo',
           },
           {
-            path: '/form/step-form',
-            name: 'stepform',
-            component: './Forms/StepForm',
-            hideChildrenInMenu: true,
-            routes: [
-              {
-                path: '/form/step-form',
-                redirect: '/form/step-form/info',
-              },
-              {
-                path: '/form/step-form/info',
-                name: 'info',
-                component: './Forms/StepForm/Step1',
-              },
-              {
-                path: '/form/step-form/confirm',
-                name: 'confirm',
-                component: './Forms/StepForm/Step2',
-              },
-              {
-                path: '/form/step-form/result',
-                name: 'result',
-                component: './Forms/StepForm/Step3',
-              },
-            ],
-          },
-          {
-            path: '/form/advanced-form',
-            name: 'advancedform',
-            authority: ['admin'],
-            component: './Forms/AdvancedForm',
+            path: '/backstage/info-manage/user',
+            component: './BaseInfoManage/UserInfo',
           },
         ],
       },
-      // list
+      //供应商管理
       {
-        path: '/list',
-        icon: 'table',
-        name: 'list',
+        name: '供应商管理',
+        path: '/backstage/supplier-manage',
+        component: './SupplierManage/SupplierManage',
+      },
+      {
+        name: '供应商配货单',
+        path: '/backstage/distribution-list',
+        component: './BackstageDistribution/BackstageDistribution',
+      },
+      //医院管理
+      {
+        name: '医院管理',
+        path: '/backstage/hospital-manage',
+        component: './HospitalManage/HospitalManage',
+      },
+      {
+        name: '医院订货单',
+        path: '/backstage/order-list',
+        component: './BackstageOrder/BackstageOrder',
+      },
+      {
+        name: '组织机构管理',
+        path: '/backstage/hospital-organization',
+        component: './HospitalOrganization/HospitalOrganization',
+      },
+      //财务管理
+      {
+        name: '财务管理',
+        icon: 'check-circle-o',
+        path: '/backstage/finance-manage',
         routes: [
           {
-            path: '/list/table-list',
-            name: 'searchtable',
-            component: './List/TableList',
+            path: '/backstage/finance-manage',
+            redirect: '/backstage/finance-manage/salesman',
           },
           {
-            path: '/list/basic-list',
-            name: 'basiclist',
-            component: './List/BasicList',
+            path: '/backstage/finance-manage/salesman',
+            name: '供应商账户',
+            component: './FinanceManage/SalesmanBill',
           },
           {
-            path: '/list/card-list',
-            name: 'cardlist',
-            component: './List/CardList',
+            path: '/backstage/finance-manage/supplier',
+            name: '业务员提成',
+            component: './FinanceManage/SupplierBill',
+          },
+        ],
+      },
+      //客户端供应商
+      {
+        name: '货品分类管理',
+        path: '/backstage/goods-manage',
+        component: './GoodsManage/GoodsManage',
+      },
+      {
+        name: '方法学',
+        path: '/backstage/methodology-manage',
+        component: './Methodology/Methodology',
+      },
+      {
+        name: '人员管理',
+        path: '/backstage/Supplier-User',
+        component: './SupplierUser/SupplierUser',
+      },
+      {
+        name: '医院订货单',
+        path: '/backstage/Order-Form',
+        component: './OrderForm/OrderForm',
+        routes: [
+          {
+            path: '/backstage/Order-Form',
+            redirect: '/backstage/Order-Form/order',
           },
           {
-            path: '/list/search',
-            name: 'searchlist',
-            component: './List/List',
-            routes: [
-              {
-                path: '/list/search',
-                redirect: '/list/search/articles',
-              },
-              {
-                path: '/list/search/articles',
-                name: 'articles',
-                component: './List/Articles',
-              },
-              {
-                path: '/list/search/projects',
-                name: 'projects',
-                component: './List/Projects',
-              },
-              {
-                path: '/list/search/applications',
-                name: 'applications',
-                component: './List/Applications',
-              },
-            ],
+            path: '/backstage/Order-Form/order',
+            name: '订货单',
+            component: './OrderForm/Order',
+          },
+          {
+            path: '/backstage/Order-Form/apply',
+            name: '申请医院',
+            component: './OrderForm/Apply',
           },
         ],
       },
       {
-        path: '/profile',
-        name: 'profile',
-        icon: 'profile',
+        name: '新建配货单',
+        path: '/backstage/Add-supplier',
+        component: './SupplierNewDistribution',
         routes: [
-          // profile
           {
-            path: '/profile/basic',
-            name: 'basic',
-            component: './Profile/BasicProfile',
+            path: '/backstage/Add-supplier',
+            redirect: '/backstage/Add-supplier/goodsList',
           },
           {
-            path: '/profile/basic/:id',
-            name: 'basic',
-            hideInMenu: true,
-            component: './Profile/BasicProfile',
+            path: '/backstage/Add-supplier/goodsList',
+            name: 'goodsList',
+            component: './SupplierNewDistribution/Step1',
           },
           {
-            path: '/profile/advanced',
-            name: 'advanced',
-            authority: ['admin'],
-            component: './Profile/AdvancedProfile',
+            path: '/backstage/Add-supplier/distribution',
+            name: 'distribution',
+            component: './SupplierNewDistribution/Step2',
+          },
+          {
+            path: '/backstage/Add-supplier/result',
+            name: 'result',
+            component: './SupplierNewDistribution/Step3',
           },
         ],
+      },
+      {
+        name: '配货',
+        path: '/backstage/Supplier-distribution',
+        component: './SupplierDistribution/SupplierDistribution',
+      },
+      {
+        path: '/backstage/Supplier-order',
+        name: '订货单记录',
+        component: './SupplierOrder/SupplierOrder',
+      },
+      {
+        path: '/backstage/Supplier-distribution-list',
+        name: '配货单记录',
+        component: './SupplierDistributionList/SupplierDistributionList',
+      },
+      {
+        name: '货品管理',
+        path: '/backstage/goods-board',
+        component: './GoodsBoard/GoodsBoard',
+      },
+      {
+        name: '我的账号',
+        path: '/backstage/Supplier-Account',
+        component: './SupplierAccount/SupplierAccount',
+      },
+      {
+        name: '我的账户',
+        path: '/backstage/Supplier-Status',
+        routes: [
+          { path: '/backstage/Supplier-Status', redirect: '/backstage/Supplier-Status/hospitals' },
+          {
+            path: '/backstage/Supplier-Status/hospitals',
+            component: './SupplierStatus/Hospitals',
+          },
+          {
+            path: '/backstage/Supplier-Status/departments',
+            component: './SupplierStatus/Departments',
+          },
+        ],
+      },
+      //医院
+      {
+        name: '订货',
+        path: '/backstage/hospital-order',
+        component: './HospitalOrder/HospitalOrder',
+        routes: [
+          {
+            path: '/backstage/hospital-order',
+            redirect: '/backstage/hospital-order/inventory',
+          },
+          {
+            path: '/backstage/hospital-order/inventory',
+            name: '库存清单',
+            component: './HospitalOrder/Inventory',
+          },
+          {
+            path: '/backstage/hospital-order/shortage',
+            name: '缺货清单',
+            component: './HospitalOrder/Shortage',
+          },
+          {
+            path: '/backstage/hospital-order/early-warning',
+            name: '有效期预警',
+            component: './HospitalOrder/EarlyWarning',
+          },
+          {
+            path: '/backstage/hospital-order/overdue',
+            name: '过期清单',
+            component: './HospitalOrder/Overdue',
+          },
+        ],
+      },
+      {
+        name: '订货单',
+        path: '/backstage/hospital-ordering',
+        component: './HospitalOrder/Ordering',
+      },
+      {
+        name: '入库',
+        path: '/backstage/hospital-warehouseing',
+        component: './HospitalWarehousing/Warehousing',
+      },
+      {
+        name: '出库',
+        path: '/backstage/hospital-ex-warehouse',
+        component: './HospitalExWarehouse/ExWarehouse',
+      },
+      {
+        name: '订货单查询',
+        path: '/backstage/hospital-order-record',
+        component: './HospitalOrderRecord/HospitalOrderRecord',
+      },
+      {
+        name: '配货单查询',
+        path: '/backstage/hospital-distribution-list',
+        component: './HospitalDistributionList/HospitalDistributionList',
+      },
+      {
+        name: '组织机构管理',
+        path: '/backstage/organization-manage',
+        component: './Organization/Organization',
+      },
+      {
+        name: '申请记录',
+        path: '/backstage/hospital-apply',
+        component: './HospitalApply/HospitalApply',
       },
       {
         name: 'result',
@@ -205,91 +306,23 @@ export default [
           {
             path: '/exception/trigger',
             name: 'trigger',
-            hideInMenu: true,
             component: './Exception/TriggerException',
           },
         ],
       },
       {
-        name: 'account',
-        icon: 'user',
-        path: '/account',
-        routes: [
-          {
-            path: '/account/center',
-            name: 'center',
-            component: './Account/Center/Center',
-            routes: [
-              {
-                path: '/account/center',
-                redirect: '/account/center/articles',
-              },
-              {
-                path: '/account/center/articles',
-                component: './Account/Center/Articles',
-              },
-              {
-                path: '/account/center/applications',
-                component: './Account/Center/Applications',
-              },
-              {
-                path: '/account/center/projects',
-                component: './Account/Center/Projects',
-              },
-            ],
-          },
-          {
-            path: '/account/settings',
-            name: 'settings',
-            component: './Account/Settings/Info',
-            routes: [
-              {
-                path: '/account/settings',
-                redirect: '/account/settings/base',
-              },
-              {
-                path: '/account/settings/base',
-                component: './Account/Settings/BaseView',
-              },
-              {
-                path: '/account/settings/security',
-                component: './Account/Settings/SecurityView',
-              },
-              {
-                path: '/account/settings/binding',
-                component: './Account/Settings/BindingView',
-              },
-              {
-                path: '/account/settings/notification',
-                component: './Account/Settings/NotificationView',
-              },
-            ],
-          },
-        ],
+        component: '404',
       },
-      //  editor
-      {
-        name: 'editor',
-        icon: 'highlight',
-        path: '/editor',
-        routes: [
-          {
-            path: '/editor/flow',
-            name: 'flow',
-            component: './Editor/GGEditor/Flow',
-          },
-          {
-            path: '/editor/mind',
-            name: 'mind',
-            component: './Editor/GGEditor/Mind',
-          },
-          {
-            path: '/editor/koni',
-            name: 'koni',
-            component: './Editor/GGEditor/Koni',
-          },
-        ],
-      },
+    ],
+  },
+
+  //index
+  {
+    path: '/',
+    component: '../layouts/BlankLayout',
+    routes: [
+      { path: '/', redirect: '/desktop' },
+      { path: '/desktop', name: 'desktop', component: './Desktop/Desktop' },
       {
         component: '404',
       },

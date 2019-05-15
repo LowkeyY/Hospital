@@ -103,24 +103,53 @@ export async function updateFakeList(params) {
   });
 }
 
-export async function fakeAccountLogin(params) {
-  return request('/api/login/account', {
+export async function login(params) {
+  return request('/api/login', {
     method: 'POST',
-    body: params,
+    body: {
+      ...params,
+    },
   });
 }
 
-export async function fakeRegister(params) {
-  return request('/api/register', {
+export async function logout(params) {
+  return request('/api/logout', {
     method: 'POST',
-    body: params,
   });
 }
 
-export async function queryNotices(params = {}) {
-  return request(`/api/notices?${stringify(params)}`);
+export async function queryMenus() {
+  return request(`/api/menu/getMenuByRole`);
 }
 
 export async function getFakeCaptcha(mobile) {
   return request(`/api/captcha?mobile=${mobile}`);
+}
+
+export async function querySalesman() {
+  return request(`/api/user/findSlsmUserList`);
+}
+
+export async function queryMethod() {
+  return request('/api/method/findMethodList');
+}
+
+export async function queryClassify() {
+  return request('/api/dir/findDirList');
+}
+
+export async function queryRole() {
+  return request('/api/role/getRoleList');
+}
+
+export async function queryHospital() {
+  return request('/api/suppilerApply/getApplyHospitalList');
+}
+
+export async function queryDepartment(params) {
+  return request(`/api/dept/getHospitalDeptById?${stringify(params)}`);
+}
+
+export async function querySupplier() {
+  return request(`/api/suppilerApply/getMySuppiler`);
 }

@@ -1,69 +1,104 @@
-import { queryNotices } from '@/services/api';
+import {
+  querySalesman,
+  queryMethod,
+  queryClassify,
+  queryRole,
+  queryHospital,
+  queryDepartment,
+  querySupplier,
+} from '@/services/api';
 
 export default {
   namespace: 'global',
 
   state: {
     collapsed: false,
-    notices: [],
+    salesman: [],
+    method: [],
+    classify: [],
+    role: [],
+    hospital: [],
+    department: [],
+    supplier: [],
   },
 
   effects: {
-    *fetchNotices(_, { call, put, select }) {
-      const data = yield call(queryNotices);
-      yield put({
-        type: 'saveNotices',
-        payload: data,
-      });
-      const unreadCount = yield select(
-        state => state.global.notices.filter(item => !item.read).length
-      );
-      yield put({
-        type: 'user/changeNotifyCount',
-        payload: {
-          totalCount: data.length,
-          unreadCount,
-        },
-      });
+    *querySalesman(_, { call, put }) {
+      const response = yield call(querySalesman);
+      if (response.success) {
+        yield put({
+          type: 'updateSalesman',
+          payload: {
+            salesman: response.data,
+          },
+        });
+      }
     },
-    *clearNotices({ payload }, { put, select }) {
-      yield put({
-        type: 'saveClearedNotices',
-        payload,
-      });
-      const count = yield select(state => state.global.notices.length);
-      const unreadCount = yield select(
-        state => state.global.notices.filter(item => !item.read).length
-      );
-      yield put({
-        type: 'user/changeNotifyCount',
-        payload: {
-          totalCount: count,
-          unreadCount,
-        },
-      });
+    *queryMethod(_, { call, put }) {
+      const response = yield call(queryMethod);
+      if (response.success) {
+        yield put({
+          type: 'updateMethod',
+          payload: {
+            method: response.data,
+          },
+        });
+      }
     },
-    *changeNoticeReadState({ payload }, { put, select }) {
-      const notices = yield select(state =>
-        state.global.notices.map(item => {
-          const notice = { ...item };
-          if (notice.id === payload) {
-            notice.read = true;
-          }
-          return notice;
-        })
-      );
-      yield put({
-        type: 'saveNotices',
-        payload: notices,
-      });
-      yield put({
-        type: 'user/changeNotifyCount',
-        payload: {
-          totalCount: notices.length,
-          unreadCount: notices.filter(item => !item.read).length,
-        },
-      });
+    *queryRole(_, { call, put }) {
+      const response = yield call(queryRole);
+      if (response.success) {
+        yield put({
+          type: 'updateRole',
+          payload: {
+            role: response.data,
+          },
+        });
+      }
+    },
+    *queryClassify(_, { call, put }) {
+      const response = yield call(queryClassify);
+      if (response.success) {
+        yield put({
+          type: 'updateClassify',
+          payload: {
+            classify: response.data,
+          },
+        });
+      }
+    },
+    *getHospital(_, { call, put }) {
+      const response = yield call(queryHospital);
+      if (response.success) {
+        yield put({
+          type: 'updateHospital',
+          payload: {
+            hospital: response.data,
+          },
+        });
+      }
+    },
+    *getDepartment({ payload }, { call, put }) {
+      const response = yield call(queryDepartment, payload);
+      if (response.success) {
+        yield put({
+          type: 'updateDepartment',
+          payload: {
+            department: response.data,
+          },
+        });
+      }
+    },
+    *getSupplier({ payload }, { call, put }) {
+      const response = yield call(querySupplier, payload);
+      if (response.success) {
+        yield put({
+          type: 'updateSupplier',
+          payload: {
+            supplier: response.data,
+          },
+        });
+      }
     },
   },
 
@@ -74,17 +109,23 @@ export default {
         collapsed: payload,
       };
     },
-    saveNotices(state, { payload }) {
-      return {
-        ...state,
-        notices: payload,
-      };
+    updateSalesman(state, { payload }) {
+      return { ...state, salesman: payload.salesman };
     },
-    saveClearedNotices(state, { payload }) {
-      return {
-        ...state,
-        notices: state.notices.filter(item => item.type !== payload),
-      };
+    updateMethod(state, { payload }) {
+      return { ...state, method: payload.method };
+    },
+    updateClassify(state, { payload }) {
+      return { ...state, classify: payload.classify };
+    },
+    updateHospital(state, { payload }) {
+      return { ...state, hospital: payload.hospital };
+    },
+    updateDepartment(state, { payload }) {
+      return { ...state, department: payload.department };
+    },
+    updateSupplier(state, { payload }) {
+      return { ...state, supplier: payload.supplier };
     },
   },
 

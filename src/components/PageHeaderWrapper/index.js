@@ -23,7 +23,7 @@ const PageHeaderWrapper = ({ children, contentWidth, wrapperClassName, top, ...r
             if (item.locale) {
               return <FormattedMessage id={item.locale} defaultMessage={item.title} />;
             }
-            return item.title;
+            return item.name;
           }}
         />
       )}

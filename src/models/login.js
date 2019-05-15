@@ -1,27 +1,26 @@
+/**
+ * Created by Lowkey on 2019/4/2 23:40
+ * version:1.0
+ */
 import { routerRedux } from 'dva/router';
-import { stringify } from 'qs';
-import { fakeAccountLogin, getFakeCaptcha } from '@/services/api';
-import { setAuthority } from '@/utils/authority';
+import { notification, message } from 'antd';
+import { login, logout } from '@/services/api';
 import { getPageQuery } from '@/utils/utils';
-import { reloadAuthorized } from '@/utils/Authorized';
 
 export default {
   namespace: 'login',
 
   state: {
-    status: undefined,
+    currentUser: {},
+    msg: '',
+    status: '',
   },
 
   effects: {
     *login({ payload }, { call, put }) {
-      const response = yield call(fakeAccountLogin, payload);
-      yield put({
-        type: 'changeLoginStatus',
-        payload: response,
-      });
-      // Login successfully
-      if (response.status === 'ok') {
-        reloadAuthorized();
+      const response = yield call(login, payload);
+      if (response.success) {
+        //记住退出前的路由
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
         let { redirect } = params;
@@ -36,44 +35,55 @@ export default {
             redirect = null;
           }
         }
+        yield put({
+          type: 'saveCurrentUser',
+          payload: response.data,
+        });
         yield put(routerRedux.replace(redirect || '/'));
+      } else {
+        message.error(response.msg);
+        yield put({
+          type: 'updateState',
+          payload: {
+            msg: response.msg,
+            status: response.status,
+          },
+        });
       }
     },
 
-    *getCaptcha({ payload }, { call }) {
-      yield call(getFakeCaptcha, payload);
-    },
-
-    *logout(_, { put }) {
-      yield put({
-        type: 'changeLoginStatus',
-        payload: {
-          status: false,
-          currentAuthority: 'guest',
-        },
-      });
-      reloadAuthorized();
-      // redirect
-      if (window.location.pathname !== '/user/login') {
+    *logout(_, { put, call }) {
+      const response = yield call(logout);
+      if (response.success) {
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userId');
         yield put(
-          routerRedux.replace({
+          routerRedux.push({
             pathname: '/user/login',
-            search: stringify({
-              redirect: window.location.href,
-            }),
           })
         );
+      } else {
+        notification.error({
+          message: `请求错误 ${response.status}}`,
+          description: response.msg,
+        });
       }
     },
   },
 
   reducers: {
-    changeLoginStatus(state, { payload }) {
-      setAuthority(payload.currentAuthority);
+    saveCurrentUser(state, action) {
+      localStorage.setItem('userName', action.payload.realName);
+      localStorage.setItem('userId', action.payload.userId);
       return {
         ...state,
-        status: payload.status,
-        type: payload.type,
+        currentUser: action.payload || {},
+      };
+    },
+    updateState(state, { payload }) {
+      return {
+        ...state,
+        ...payload,
       };
     },
   },

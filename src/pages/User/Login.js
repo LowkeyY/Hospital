@@ -1,61 +1,33 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { formatMessage, FormattedMessage } from 'umi-plugin-react/locale';
-import Link from 'umi/link';
-import { Checkbox, Alert, Icon } from 'antd';
-import Login from '@/components/Login';
+import { Checkbox, Alert, Icon, Form, Input, Button } from 'antd';
+import md5 from 'md5';
 import styles from './Login.less';
-
-const { Tab, UserName, Password, Mobile, Captcha, Submit } = Login;
 
 @connect(({ login, loading }) => ({
   login,
   submitting: loading.effects['login/login'],
 }))
+@Form.create()
 class LoginPage extends Component {
   state = {
-    type: 'account',
-    autoLogin: true,
+    style: { fontSize: '18px', color: 'rgba(0,0,0,.25)' },
   };
 
-  onTabChange = type => {
-    this.setState({ type });
-  };
-
-  onGetCaptcha = () =>
-    new Promise((resolve, reject) => {
-      this.loginForm.validateFields(['mobile'], {}, (err, values) => {
-        if (err) {
-          reject(err);
-        } else {
-          const { dispatch } = this.props;
-          dispatch({
-            type: 'login/getCaptcha',
-            payload: values.mobile,
-          })
-            .then(resolve)
-            .catch(reject);
-        }
-      });
-    });
-
-  handleSubmit = (err, values) => {
-    const { type } = this.state;
-    if (!err) {
-      const { dispatch } = this.props;
-      dispatch({
-        type: 'login/login',
-        payload: {
-          ...values,
-          type,
-        },
-      });
-    }
-  };
-
-  changeAutoLogin = e => {
-    this.setState({
-      autoLogin: e.target.checked,
+  handleSubmit = e => {
+    e.preventDefault();
+    this.props.form.validateFields((err, values) => {
+      if (!err) {
+        const { dispatch } = this.props;
+        const { userName, userPwd } = values;
+        dispatch({
+          type: 'login/login',
+          payload: {
+            userName,
+            userPwd: md5(userPwd),
+          },
+        });
+      }
     });
   };
 
@@ -64,105 +36,44 @@ class LoginPage extends Component {
   );
 
   render() {
-    const { login, submitting } = this.props;
-    const { type, autoLogin } = this.state;
+    const { login, submitting, form } = this.props;
+    const { getFieldDecorator } = form;
+    const { msg, status } = login;
+    const { style } = this.state;
     return (
       <div className={styles.main}>
-        <Login
-          defaultActiveKey={type}
-          onTabChange={this.onTabChange}
-          onSubmit={this.handleSubmit}
-          ref={form => {
-            this.loginForm = form;
-          }}
-        >
-          <Tab key="account" tab={formatMessage({ id: 'app.login.tab-login-credentials' })}>
-            {login.status === 'error' &&
-              login.type === 'account' &&
-              !submitting &&
-              this.renderMessage(formatMessage({ id: 'app.login.message-invalid-credentials' }))}
-            <UserName
-              name="userName"
-              placeholder={`${formatMessage({ id: 'app.login.userName' })}: admin or user`}
-              rules={[
-                {
-                  required: true,
-                  message: formatMessage({ id: 'validation.userName.required' }),
-                },
-              ]}
-            />
-            <Password
-              name="password"
-              placeholder={`${formatMessage({ id: 'app.login.password' })}: ant.design`}
-              rules={[
-                {
-                  required: true,
-                  message: formatMessage({ id: 'validation.password.required' }),
-                },
-              ]}
-              onPressEnter={e => {
-                e.preventDefault();
-                this.loginForm.validateFields(this.handleSubmit);
-              }}
-            />
-          </Tab>
-          <Tab key="mobile" tab={formatMessage({ id: 'app.login.tab-login-mobile' })}>
-            {login.status === 'error' &&
-              login.type === 'mobile' &&
-              !submitting &&
-              this.renderMessage(
-                formatMessage({ id: 'app.login.message-invalid-verification-code' })
-              )}
-            <Mobile
-              name="mobile"
-              placeholder={formatMessage({ id: 'form.phone-number.placeholder' })}
-              rules={[
-                {
-                  required: true,
-                  message: formatMessage({ id: 'validation.phone-number.required' }),
-                },
-                {
-                  pattern: /^1\d{10}$/,
-                  message: formatMessage({ id: 'validation.phone-number.wrong-format' }),
-                },
-              ]}
-            />
-            <Captcha
-              name="captcha"
-              placeholder={formatMessage({ id: 'form.verification-code.placeholder' })}
-              countDown={120}
-              onGetCaptcha={this.onGetCaptcha}
-              getCaptchaButtonText={formatMessage({ id: 'form.get-captcha' })}
-              getCaptchaSecondText={formatMessage({ id: 'form.captcha.second' })}
-              rules={[
-                {
-                  required: true,
-                  message: formatMessage({ id: 'validation.verification-code.required' }),
-                },
-              ]}
-            />
-          </Tab>
-          <div>
-            <Checkbox checked={autoLogin} onChange={this.changeAutoLogin}>
-              <FormattedMessage id="app.login.remember-me" />
-            </Checkbox>
-            <a style={{ float: 'right' }} href="">
-              <FormattedMessage id="app.login.forgot-password" />
-            </a>
-          </div>
-          <Submit loading={submitting}>
-            <FormattedMessage id="app.login.login" />
-          </Submit>
-          <div className={styles.other}>
-            <FormattedMessage id="app.login.sign-in-with" />
-            <Icon type="alipay-circle" className={styles.icon} theme="outlined" />
-            <Icon type="taobao-circle" className={styles.icon} theme="outlined" />
-            <Icon type="weibo-circle" className={styles.icon} theme="outlined" />
-            <Link className={styles.register} to="/user/register">
-              <FormattedMessage id="app.login.signup" />
-            </Link>
-          </div>
-        </Login>
+        <Form onSubmit={this.handleSubmit}>
+          {status === 1002 && !submitting && this.renderMessage(msg)}
+          <Form.Item>
+            {getFieldDecorator('userName', {
+              rules: [{ required: true, message: '请输入用户名' }],
+            })(
+              <Input
+                size="large"
+                prefix={<Icon type="user" style={style} />}
+                placeholder="用户名"
+              />
+            )}
+          </Form.Item>
+          <Form.Item>
+            {getFieldDecorator('userPwd', {
+              rules: [{ required: false, message: '请输入密码' }],
+            })(
+              <Input.Password
+                size="large"
+                prefix={<Icon type="lock" style={style} />}
+                type="password"
+                placeholder="密码"
+              />
+            )}
+          </Form.Item>
+          <Form.Item>
+            <Checkbox>记住密码</Checkbox>
+            <Button loading={submitting} type="primary" size="large" block htmlType="submit">
+              登陆
+            </Button>
+          </Form.Item>
+        </Form>
       </div>
     );
   }
