@@ -19,6 +19,7 @@ export default {
   namespace: 'hospitalApply',
   state: {
     list: [],
+    details: {},
     totalCount: '',
     nowPage: '1',
     pageSize: '10',
@@ -45,6 +46,20 @@ export default {
             totalCount: data.totalCount,
             nowPage: data.nowPage,
             pageSize: data.pageSize,
+          },
+        });
+      } else {
+        message.error(msg || '请稍后再试');
+      }
+    },
+
+    *queryDetails({ payload }, { call, put }) {
+      const { data, success, msg } = yield call(Service.queryDetails, payload);
+      if (success) {
+        yield put({
+          type: 'updateState',
+          payload: {
+            details: data,
           },
         });
       } else {
@@ -97,11 +112,7 @@ export default {
   },
   subscriptions: {
     setup({ dispatch, history }) {
-      return history.listen(({ pathname, query }) => {
-        if (pathname === '/backstage/hospital-apply') {
-          dispatch({ type: 'fetch', payload: query });
-        }
-      });
+      return history.listen(({ pathname, query }) => {});
     },
   },
 };

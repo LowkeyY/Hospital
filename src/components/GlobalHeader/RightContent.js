@@ -25,8 +25,16 @@ export default class GlobalHeaderRight extends PureComponent {
       className = `${styles.right}  ${styles.dark}`;
     }
     const userName = localStorage.getItem('userName');
+    const deptName = localStorage.getItem('deptName');
+    const deptType = localStorage.getItem('deptType');
+    const hospitalName = localStorage.getItem('hospitalName');
     return (
       <div className={className}>
+        {deptType === '1' || deptType === '2' || deptType === '3' ? (
+          <span className={styles.deptName}>{`${hospitalName}——${deptName}`}</span>
+        ) : (
+          ''
+        )}
         <HeaderDropdown overlay={menu}>
           <span className={`${styles.action} ${styles.account}`}>
             <Avatar

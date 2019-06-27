@@ -17,9 +17,15 @@ class OrderingModal extends Component {
   }
 
   componentDidMount() {
-    const { dispatch } = this.props;
+    const {
+      dispatch,
+      hospitalOrder: { deptId },
+    } = this.props;
     dispatch({
       type: 'global/getSupplier',
+      payload: {
+        deptId,
+      },
     });
   }
 
@@ -38,13 +44,11 @@ class OrderingModal extends Component {
     });
   };
 
-  okHandler = () => {
-    const { onOk } = this.props;
-    onOk();
-  };
-
   renderGoods = val => {
-    const { dispatch } = this.props;
+    const {
+      dispatch,
+      hospitalOrder: { deptId },
+    } = this.props;
     dispatch({
       type: 'hospitalOrder/updateState',
       payload: {
@@ -53,6 +57,9 @@ class OrderingModal extends Component {
     });
     dispatch({
       type: 'hospitalOrder/fetchGoods',
+      payload: {
+        deptId,
+      },
     });
   };
 
@@ -74,6 +81,7 @@ class OrderingModal extends Component {
     const {
       dispatch,
       hospitalManage: { pageSize },
+      hospitalOrder: { deptId, suppilerId },
     } = this.props;
     dispatch({
       type: 'hospitalOrder/updateNowPage',
@@ -86,12 +94,17 @@ class OrderingModal extends Component {
       payload: {
         nowPage: page,
         pageSize,
+        deptId,
+        suppilerId,
       },
     });
   };
 
   onShowSizeChange = (current, pageSize) => {
-    const { dispatch } = this.props;
+    const {
+      dispatch,
+      hospitalOrder: { deptId, suppilerId },
+    } = this.props;
     // dispatch({
     //   type: 'user/updatePageSize',
     //   payload: {
@@ -103,8 +116,17 @@ class OrderingModal extends Component {
       payload: {
         nowPage: current,
         pageSize,
+        deptId,
+        suppilerId,
       },
     });
+  };
+
+  chickStatus = id => {
+    const {
+      hospitalOrder: { shopList },
+    } = this.props;
+    return shopList.find(item => item.goodsId === id);
   };
 
   render() {
@@ -126,20 +148,9 @@ class OrderingModal extends Component {
         key: 'key',
       },
       {
-        title: '供应商',
-        dataIndex: 'suppilerName',
-        key: 'suppilerName',
-        render: (text, record) => record.suppilerBase.suppilerName,
-      },
-      {
         title: '货品名称',
         dataIndex: 'goodsNameCn',
         key: 'goodsNameCn',
-      },
-      {
-        title: '厂家',
-        dataIndex: 'manufacturer',
-        key: 'manufacturer',
       },
       {
         title: '规格',
@@ -152,19 +163,32 @@ class OrderingModal extends Component {
         key: 'goodsUnit',
       },
       {
-        title: '数量',
-        dataIndex: 'goodsNumber',
-        key: 'goodsNumber',
-        render: (text, record) => (
-          <InputNumber min={1} defaultValue={1} onChange={value => this.changeNum(value, record)} />
-        ),
+        title: '方法学',
+        dataIndex: 'methodName',
+        key: 'methodName',
+        render: (text, record) => record.methodBase.methodName,
+      },
+      {
+        title: '厂家',
+        dataIndex: 'manufacturer',
+        key: 'manufacturer',
+      },
+      {
+        title: '产地',
+        dataIndex: 'isImportef',
+        key: 'isImportef',
+        render: (text, record) => (record.isImportef === '0' ? '进口' : '国产'),
       },
       {
         title: '操作',
         key: 'operation',
         render: (text, record) => (
-          <Button type="primary" onClick={() => this.handlerAddClick(record)}>
-            添加
+          <Button
+            disabled={this.chickStatus(record.goodsId)}
+            type="primary"
+            onClick={() => this.handlerAddClick(record)}
+          >
+            {this.chickStatus(record.goodsId) ? '已添加' : '添加'}
           </Button>
         ),
       },
@@ -177,10 +201,10 @@ class OrderingModal extends Component {
           title="添加货品"
           width="80%"
           visible={visible}
-          onOk={this.okHandler}
           onCancel={this.hideModelHandler}
+          footer={null}
         >
-          <Form className={styles.form} horizontal onSubmit={this.okHandler}>
+          <Form className={styles.form} horizontal>
             <Form.Item {...formItemLayout} label="选择供应商">
               <div id="classifyArea" style={{ position: 'relative' }}>
                 <Select
@@ -188,12 +212,11 @@ class OrderingModal extends Component {
                   getPopupContainer={() => document.getElementById('classifyArea')}
                 >
                   {supplier.map(item => (
-                    <Select.Option value={item.suppilerBase.suppilerId}>
+                    <Select.Option key={item.suppilerId} value={item.suppilerBase.suppilerId}>
                       {item.suppilerBase.suppilerName}
                     </Select.Option>
                   ))}
                 </Select>
-                ,
               </div>
             </Form.Item>
           </Form>
@@ -201,7 +224,7 @@ class OrderingModal extends Component {
             <Table
               columns={columns}
               dataSource={goodsList}
-              rowKey={record => record.id}
+              rowKey={record => record.goodsId}
               loading={goodsLoading}
               pagination={false}
               onChange={this.pageChangeHandler}

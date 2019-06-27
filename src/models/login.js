@@ -1,5 +1,5 @@
 /**
- * Created by Lowkey on 2019/4/2 23:40
+ * Created by  on 2019/4/2 23:40
  * version:1.0
  */
 import { routerRedux } from 'dva/router';
@@ -39,7 +39,14 @@ export default {
           type: 'saveCurrentUser',
           payload: response.data,
         });
-        yield put(routerRedux.replace(redirect || '/'));
+        const {
+          deptBase: { deptType },
+        } = response.data;
+        if (deptType === '4') {
+          yield put(routerRedux.replace('/backstage/Order-Form/order'));
+        } else {
+          yield put(routerRedux.replace(redirect || '/'));
+        }
       } else {
         message.error(response.msg);
         yield put({
@@ -57,11 +64,38 @@ export default {
       if (response.success) {
         localStorage.removeItem('userName');
         localStorage.removeItem('userId');
+        localStorage.removeItem('deptType');
+        localStorage.removeItem('deptName');
+        localStorage.removeItem('hospitalName');
         yield put(
           routerRedux.push({
             pathname: '/user/login',
           })
         );
+        yield put({
+          type: 'hospitalOrder/updateState',
+          payload: {
+            deptId: '',
+          },
+        });
+        yield put({
+          type: 'hospitalOrderRecord/updateState',
+          payload: {
+            deptId: '',
+          },
+        });
+        yield put({
+          type: 'hospitalDistributionList/updateState',
+          payload: {
+            deptId: '',
+          },
+        });
+        yield put({
+          type: 'supplierGoods/updateState',
+          payload: {
+            deptId: '',
+          },
+        });
       } else {
         notification.error({
           message: `请求错误 ${response.status}}`,
@@ -73,8 +107,11 @@ export default {
 
   reducers: {
     saveCurrentUser(state, action) {
-      localStorage.setItem('userName', action.payload.realName);
+      localStorage.setItem('userName', action.payload.userRealName);
       localStorage.setItem('userId', action.payload.userId);
+      localStorage.setItem('deptType', action.payload.deptBase.deptType);
+      localStorage.setItem('deptName', action.payload.deptBase.deptName);
+      localStorage.setItem('hospitalName', action.payload.hospitalBase.hospitalName);
       return {
         ...state,
         currentUser: action.payload || {},

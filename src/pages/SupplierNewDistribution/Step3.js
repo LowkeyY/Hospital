@@ -10,9 +10,8 @@ import styles from './style.less';
 }))
 class Step3 extends React.PureComponent {
   render() {
-    const { data } = this.props;
     const onFinish = () => {
-      router.push('/backstage/Add-supplier/goodsList');
+      router.push('/backstage/Add-supplier/fill-form');
     };
     const onFinish2 = () => {
       router.push('/backstage/Supplier-distribution-list');

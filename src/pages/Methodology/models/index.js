@@ -27,13 +27,17 @@ export default {
   },
   effects: {
     *fetch(_, { call, put }) {
-      const { data } = yield call(Service.query);
-      yield put({
-        type: 'updateState',
-        payload: {
-          list: getList(data),
-        },
-      });
+      const { data, success } = yield call(Service.query);
+      if (success) {
+        yield put({
+          type: 'updateState',
+          payload: {
+            list: getList(data),
+          },
+        });
+      } else {
+        message.error(data.message);
+      }
     },
     *create({ payload: values }, { call, put }) {
       const data = yield call(Service.create, values);

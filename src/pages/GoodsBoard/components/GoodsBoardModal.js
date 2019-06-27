@@ -15,15 +15,7 @@ class GoodsBoardModal extends Component {
     };
   }
 
-  componentDidMount() {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'global/queryClassify',
-    });
-    dispatch({
-      type: 'global/queryMethod',
-    });
-  }
+  componentDidMount() {}
 
   showModelHandler = e => {
     if (e) e.stopPropagation();
@@ -72,6 +64,7 @@ class GoodsBoardModal extends Component {
       methodId = '',
       dirId = '',
       goodsRemark = '',
+      update = false,
     } = record;
     const formItemLayout = {
       labelCol: { span: 6 },
@@ -82,7 +75,7 @@ class GoodsBoardModal extends Component {
       <span>
         <span onClick={this.showModelHandler}>{children}</span>
         <Modal
-          title={`${record.userId ? '修改' : '添加'}货品`}
+          title={`${record.goodsId ? '修改' : '添加'}货品`}
           visible={visible}
           onOk={this.okHandler}
           onCancel={this.hideModelHandler}
@@ -95,7 +88,7 @@ class GoodsBoardModal extends Component {
                   rules: [{ required: true, message: '请输入许可证号' }],
                 })(
                   <Select
-                    disabled={isEdit}
+                    disabled={!update && record.goodsId}
                     getPopupContainer={() => document.getElementById('classifyArea')}
                   >
                     {classify.map(item => (
@@ -109,31 +102,31 @@ class GoodsBoardModal extends Component {
               {getFieldDecorator('registMark', {
                 initialValue: registMark,
                 rules: [{ required: true, message: '注册号不能为空' }],
-              })(<Input disabled={isEdit} />)}
+              })(<Input disabled={!update && record.goodsId} />)}
             </FormItem>
             <FormItem {...formItemLayout} label="货品中文名" hasFeedback={!isEdit}>
               {getFieldDecorator('goodsNameCn', {
                 initialValue: goodsNameCn,
                 rules: [{ required: true, message: '货品中文名必须输入' }],
-              })(<Input disabled={isEdit} />)}
+              })(<Input disabled={!update && record.goodsId} />)}
             </FormItem>
             <FormItem {...formItemLayout} label="货品英文名" hasFeedback={!isEdit}>
               {getFieldDecorator('goodsNameEn', {
                 initialValue: goodsNameEn,
                 rules: [{ required: true, message: '货品英文名必须输入' }],
-              })(<Input disabled={isEdit} />)}
+              })(<Input disabled={!update && record.goodsId} />)}
             </FormItem>
             <FormItem {...formItemLayout} label="生产厂家（选填）" hasFeedback={!isEdit}>
               {getFieldDecorator('manufacturer', {
                 initialValue: manufacturer,
                 rules: [{ required: false, message: '请输入生产厂家' }],
-              })(<Input disabled={isEdit} />)}
+              })(<Input disabled={!update && record.goodsId} />)}
             </FormItem>
             <Form.Item {...formItemLayout} label="产地">
               {getFieldDecorator('isImportef', {
                 initialValue: isImportef,
               })(
-                <Radio.Group disabled={isEdit}>
+                <Radio.Group disabled={!update && record.goodsId}>
                   <Radio value="0">进口</Radio>
                   <Radio value="1">国产</Radio>
                 </Radio.Group>
@@ -143,7 +136,7 @@ class GoodsBoardModal extends Component {
               {getFieldDecorator('goodsSpec', {
                 initialValue: goodsSpec,
                 rules: [{ required: true, message: '请输入规格' }],
-              })(<Input disabled={isEdit} />)}
+              })(<Input disabled={!update && record.goodsId} />)}
             </FormItem>
             <Form.Item {...formItemLayout} label="方法学">
               <div id="methodArea" style={{ position: 'relative' }}>
@@ -152,7 +145,7 @@ class GoodsBoardModal extends Component {
                   rules: [{ required: true, message: '请输入许可证号' }],
                 })(
                   <Select
-                    disabled={isEdit}
+                    disabled={!update && record.goodsId}
                     getPopupContainer={() => document.getElementById('methodArea')}
                   >
                     {method.map(item => (
@@ -166,7 +159,7 @@ class GoodsBoardModal extends Component {
               {getFieldDecorator('goodsUnit', {
                 initialValue: goodsUnit,
                 rules: [{ required: true, message: '单位不能为空' }],
-              })(<Input disabled={isEdit} />)}
+              })(<Input disabled={!update && record.goodsId} />)}
             </FormItem>
             <FormItem {...formItemLayout} label="备注" hasFeedback>
               {getFieldDecorator('goodsRemark', {

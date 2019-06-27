@@ -1,19 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import {
-  Card,
-  Row,
-  Col,
-  Button,
-  Tree,
-  Icon,
-  Table,
-  message,
-  Modal,
-  Menu,
-  Dropdown,
-  Spin,
-} from 'antd';
+import { Card, Row, Col, Button, Tree, Icon, Table, message, Modal, Spin } from 'antd';
 import { isUrl } from '@/utils/utils';
 import IconFont from '@/components/IconFont';
 import GridContent from '@/components/PageHeaderWrapper/GridContent';
@@ -49,33 +36,52 @@ const columns = [
   menuManage,
   roleManage,
   treeLoading: loading.effects['menuManage/fetch'],
+  selectLoading: loading.effects['menuManage/queryMenuItem'],
   roleLoading: loading.effects['roleManage/fetch'],
 }))
 class MenuManage extends PureComponent {
   state = {};
 
   rowSelection = {
-    onChange: (selectedRowKeys, selectedRows = []) => {
-      const res = [];
-      selectedRows.map(item => {
-        res.push(item.roleId);
-        return res;
-      });
-      const { dispatch } = this.props;
+    onSelect: record => {
+      const {
+        menuManage: { menuRole },
+        dispatch,
+      } = this.props;
+      const res = menuRole.split(',');
+      if (!res.includes(`[${record.roleId}]`)) {
+        res.push(`[${record.roleId}]`);
+      } else {
+        const index = res.indexOf(`[${record.roleId}]`);
+        res.splice(index, 1);
+      }
       dispatch({
         type: 'menuManage/updateMenuRole',
         payload: res.join(','),
       });
     },
-    getCheckboxProps: record => ({
-      defaultChecked: this.isChecked(record.roleId),
-    }),
+    getCheckboxProps: record => {
+      const {
+        menuManage: { menuRole },
+      } = this.props;
+      return { checked: menuRole.split(',').includes(`[${record.roleId}]`) };
+    },
   };
 
   componentDidMount() {
-    const { dispatch } = this.props;
+    const {
+      dispatch,
+      menuManage: { selectedKey },
+    } = this.props;
     dispatch({
       type: 'menuManage/fetch',
+    });
+    dispatch({
+      type: 'roleManage/fetch',
+    });
+    dispatch({
+      type: 'menuManage/queryMenuItem',
+      payload: { menuId: selectedKey.join('') },
     });
   }
 
@@ -147,9 +153,9 @@ class MenuManage extends PureComponent {
       type: 'menuManage/editor',
       payload: {
         ...values,
-        menuId: selectedKey,
+        menuId: selectedKey.join(','),
         pMenuId: menuItem.pMenuId || '',
-        menuRoles: this.getMenuRole(menuItem.menuRoles),
+        menuRoles: menuItem.menuRoles,
       },
     });
   };
@@ -162,7 +168,7 @@ class MenuManage extends PureComponent {
     dispatch({
       type: 'menuManage/deleteMenu',
       payload: {
-        menuId: selectedKey,
+        menuId: selectedKey.join(','),
       },
     });
   };
@@ -206,8 +212,8 @@ class MenuManage extends PureComponent {
       type: 'menuManage/editor',
       payload: {
         ...menuItem,
-        menuRoles: this.getMenuRole(menuRole),
-        menuId: selectedKey,
+        menuRoles: menuRole,
+        menuId: selectedKey.join(','),
       },
     });
   };
@@ -218,18 +224,17 @@ class MenuManage extends PureComponent {
       dispatch({
         type: 'menuManage/updateState',
         payload: {
-          selectedKey: key.join(''),
+          selectedKey: key,
+          menuRole: '',
         },
       });
       dispatch({
         type: 'menuManage/queryMenuItem',
         payload: { menuId: key.join('') },
       });
-      dispatch({
-        type: 'roleManage/fetch',
-      });
     } else {
-      message.error('未选择菜单');
+      console.log(key);
+      // message.error('未选择菜单');
     }
   };
 
@@ -245,33 +250,13 @@ class MenuManage extends PureComponent {
       return <TreeNode title={item.title} key={item.key} icon={getIcon(item.icon)} />;
     });
 
-  isChecked = item => {
-    const {
-      menuManage: { menuRole },
-    } = this.props;
-    if (menuRole) {
-      return menuRole.includes(`[${item}]`);
-    }
-  };
-
-  getMenuRole = str => {
-    const res = [];
-    if (!str) {
-      return;
-    }
-    const arr = str.split(',');
-    arr.map(item => {
-      res.push(`[${item}]`);
-    });
-    return res.join(',');
-  };
-
   render() {
     const {
-      menuManage: { menuTree = [], menuItem },
+      menuManage: { menuTree = [], menuItem, selectedKey },
       roleManage: { roleList },
       treeLoading,
       roleLoading,
+      selectLoading,
     } = this.props;
     return (
       <GridContent>
@@ -288,8 +273,8 @@ class MenuManage extends PureComponent {
               ) : (
                 <Tree
                   showIcon
+                  selectedKeys={selectedKey}
                   defaultExpandAll
-                  defaultSelectedKeys={[1]}
                   switcherIcon={<Icon type="down" style={{ fontSize: '16px' }} />}
                   onSelect={this.handlerTreeSelect}
                 >
@@ -307,7 +292,7 @@ class MenuManage extends PureComponent {
                 pagination={false}
                 columns={columns}
                 dataSource={roleList}
-                loading={roleLoading}
+                loading={roleLoading || selectLoading}
               />
             </Card>
           </Col>

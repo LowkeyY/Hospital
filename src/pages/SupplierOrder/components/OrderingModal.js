@@ -43,37 +43,38 @@ class OrderingModal extends Component {
     const { visible } = this.state;
     const columns = [
       {
-        title: '序号',
-        dataIndex: 'key',
-        key: 'key',
-      },
-      {
         title: '货品',
         dataIndex: 'goodsName',
         key: 'goodsName',
       },
       {
-        title: '厂家',
-        dataIndex: 'manufacturer',
-        key: 'manufacturer',
-        render: (text, record) => record.goodsBase.manufacturer,
-      },
-      {
         title: '规格',
         dataIndex: 'goodsSpec',
         key: 'goodsSpec',
-        render: (text, record) => record.goodsBase.goodsSpec,
-      },
-      {
-        title: '单位',
-        dataIndex: 'goodsUnit',
-        key: 'goodsUnit',
-        render: (text, record) => record.goodsBase.goodsUnit,
+        render: (text, record) => record.goodsBase && record.goodsBase.goodsSpec,
       },
       {
         title: '数量',
         dataIndex: 'goodsNumber',
         key: 'goodsNumber',
+      },
+      {
+        title: '单位',
+        dataIndex: 'goodsUnit',
+        key: 'goodsUnit',
+        render: (text, record) => record.goodsBase && record.goodsBase.goodsUnit,
+      },
+      {
+        title: '方法学',
+        dataIndex: 'methodName',
+        key: 'methodName',
+        render: (text, record) => record.goodsBase && record.goodsBase.methodBase.methodName,
+      },
+      {
+        title: '厂家',
+        dataIndex: 'manufacturer',
+        key: 'manufacturer',
+        render: (text, record) => record.goodsBase && record.goodsBase.manufacturer,
       },
     ];
 

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Modal, Table, Button } from 'antd';
+import { Modal, Table, Button, Tag } from 'antd';
+import EditorModal from './EditorModal';
 import styles from './OrderingModal.less';
 
 @connect(({ supplierDistributionList, loading }) => ({
@@ -34,6 +35,20 @@ class OrderingModal extends Component {
     });
   };
 
+  editHandler = (id, values) => {
+    const { dispatch } = this.props;
+    const { termOfValidity, sterilizationDate, batchNumber } = values;
+    dispatch({
+      type: 'supplierDistributionList/editor',
+      payload: {
+        batchNumber,
+        termOfValidity: termOfValidity.format('YYYY-MM-DD'),
+        sterilizationDate: sterilizationDate.format('YYYY-MM-DD'),
+        detailId: id,
+      },
+    });
+  };
+
   render() {
     const {
       children,
@@ -41,23 +56,45 @@ class OrderingModal extends Component {
       orderLoading,
     } = this.props;
     const { visible } = this.state;
+
     const columns = [
-      {
-        title: '序号',
-        dataIndex: 'key',
-        key: 'key',
-      },
       {
         title: '货品名称',
         dataIndex: 'goodsName',
         key: 'goodsName',
+        width: 200,
         render: (text, record) => record.goodsBase.goodsNameCn,
+      },
+      {
+        title: '规格',
+        dataIndex: 'goodsSpec',
+        key: 'goodsSpec',
+        render: (text, record) => record.goodsBase.goodsSpec,
+      },
+      {
+        title: '单位',
+        dataIndex: 'goodsUnit',
+        key: 'goodsUnit',
+        render: (text, record) => record.goodsBase.goodsUnit,
+      },
+      {
+        title: '方法学',
+        dataIndex: 'methodName',
+        key: 'methodName',
+        render: (text, record) => record.goodsBase && record.goodsBase.methodBase.methodName,
       },
       {
         title: '厂家',
         dataIndex: 'manufacturer',
         key: 'manufacturer',
+        width: 200,
         render: (text, record) => record.goodsBase.manufacturer,
+      },
+
+      {
+        title: '数量',
+        dataIndex: 'goodsNumber',
+        key: 'goodsNumber',
       },
       {
         title: '批号',
@@ -75,35 +112,31 @@ class OrderingModal extends Component {
         key: 'sterilizationDate',
       },
       {
-        title: '规格',
-        dataIndex: 'goodsSpec',
-        key: 'goodsSpec',
-        render: (text, record) => record.goodsBase.goodsSpec,
-      },
-      {
-        title: '单位',
-        dataIndex: 'goodsUnit',
-        key: 'goodsUnit',
-        render: (text, record) => record.goodsBase.goodsUnit,
-      },
-      {
-        title: '数量',
-        dataIndex: 'goodsNumber',
-        key: 'goodsNumber',
-      },
-      {
-        title: '单价',
-        dataIndex: 'unitPrice',
-        key: 'unitPrice',
+        title: '操作',
+        key: 'operation',
+        render: (text, record) => {
+          if (record.goodsBase.state === '1') {
+            return (
+              <EditorModal
+                record={record}
+                onOk={values => this.editHandler(record.detailId, values)}
+              >
+                <Button type="primary" ghost size="small">
+                  修改
+                </Button>
+              </EditorModal>
+            );
+          }
+          return <Tag color="cyan">已入库</Tag>;
+        },
       },
     ];
-
     return (
       <span>
         <span onClick={this.showModelHandler}>{children}</span>
         <Modal
-          title="订货单详情"
-          width="80%"
+          title="配货单详情"
+          width="90%"
           visible={visible}
           footer={null}
           onCancel={this.hideModelHandler}
@@ -112,7 +145,7 @@ class OrderingModal extends Component {
             <Table
               columns={columns}
               dataSource={detailsList}
-              rowKey={record => record.id}
+              rowKey={record => record.detailId}
               loading={orderLoading}
               pagination={false}
             />

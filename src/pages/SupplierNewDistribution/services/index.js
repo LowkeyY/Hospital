@@ -2,8 +2,10 @@ import { stringify } from 'qs';
 import request from '@/utils/request';
 
 export async function queryGoodsList(params) {
-  const { nowPage = 1, pageSize = 10 } = params;
-  return request(`/api/goods/findUserSpGoodByPage?nowPage=${nowPage}&pageSize=${pageSize}`);
+  const { nowPage = 1, pageSize = 10, deptId = '' } = params;
+  return request(
+    `/api/goods/findSpAddedGoodByDept?nowPage=${nowPage}&pageSize=${pageSize}&deptId=${deptId}`
+  );
 }
 
 export async function queryHospital() {

@@ -135,6 +135,17 @@ class SupplierManage extends PureComponent {
     );
   };
 
+  handlerUserManageClick = record => {
+    const { dispatch } = this.props;
+    const { suppilerId, suppilerName } = record;
+    dispatch(
+      routerRedux.push({
+        pathname: '/backstage/supplierManage-user',
+        query: { suppilerId, suppilerName },
+      })
+    );
+  };
+
   render() {
     const {
       supplier: { list, totalCount, nowPage, pageSize },
@@ -203,6 +214,15 @@ class SupplierManage extends PureComponent {
         render: (text, record) => (
           <Button size="small" onClick={() => this.handlerDistributionClick(record)}>
             配货单
+          </Button>
+        ),
+      },
+      {
+        title: '人员管理',
+        key: 'user',
+        render: (text, record) => (
+          <Button size="small" onClick={() => this.handlerUserManageClick(record)}>
+            人员管理
           </Button>
         ),
       },

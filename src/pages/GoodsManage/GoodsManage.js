@@ -4,6 +4,7 @@ import { Table, Popconfirm, Button, Icon } from 'antd';
 import GoodsModal from './components/modal';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import styles from './GoodsManage.less';
+import MethodologyModal from '../Methodology/components/modal';
 
 @connect(({ loading, goods }) => ({
   goods,
@@ -28,7 +29,6 @@ class GoodsManage extends PureComponent {
   };
 
   editHandler = (id, values) => {
-    console.log(id);
     const { dispatch } = this.props;
     dispatch({
       type: 'goods/editor',
@@ -81,11 +81,14 @@ class GoodsManage extends PureComponent {
         render: (text, record) => (
           <span className={styles.operation}>
             <GoodsModal record={record} onOk={values => this.editHandler(record.dirId, values)}>
-              <Icon className={styles.icon} type="edit" />
+              {/*<Icon className={styles.icon} type="edit" />*/}
+              <Button type="primary" ghost size="small">
+                编辑
+              </Button>
             </GoodsModal>
-            <Popconfirm title="确定删除?" onConfirm={() => this.deleteGoods(record.dirId)}>
-              <Icon className={styles.icon} type="delete" />
-            </Popconfirm>
+            {/*<Popconfirm title="确定删除?" onConfirm={() => this.deleteGoods(record.dirId)}>*/}
+            {/*<Icon className={styles.icon} type="delete" />*/}
+            {/*</Popconfirm>*/}
           </span>
         ),
       },

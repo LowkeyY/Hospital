@@ -3,7 +3,7 @@ import { connect } from 'dva';
 import { Icon } from 'antd';
 import DocumentTitle from 'react-document-title';
 import styles from './UserLayout.less';
-import logo from '../assets/logo.svg';
+import logo from '../assets/logo.png';
 import getPageTitle from '@/utils/getPageTitle';
 
 class UserLayout extends Component {

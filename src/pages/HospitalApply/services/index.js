@@ -1,8 +1,8 @@
+import { stringify } from 'qs';
 import request from '@/utils/request';
 
 export async function queryList(params) {
-  const { nowPage = 1, pageSize = 10 } = params;
-  return request(`/api/suppilerApply/getMySuppilerApply?nowPage=${nowPage}&pageSize=${pageSize}`);
+  return request(`/api/suppilerApply/getMySuppilerApply?${stringify(params)}`);
 }
 
 export async function pass(params) {
@@ -39,4 +39,8 @@ export async function block(params) {
       ...params,
     },
   });
+}
+
+export async function queryDetails(params) {
+  return request(`/api/suppiler/getSuppiler?${stringify(params)}`);
 }

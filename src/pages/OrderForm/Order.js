@@ -1,8 +1,7 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
-import { Card, List, Button, Icon } from 'antd';
-
+import { Card, List, Button, Icon, Tag, Modal } from 'antd';
 import styles from './Order.less';
 
 @connect(({ orderForm, loading }) => ({
@@ -41,6 +40,23 @@ class CardList extends PureComponent {
     );
   };
 
+  info = item => {
+    console.log(item);
+    const {
+      hospitalBase: { hospitalName = '' },
+      pruchaseInfo,
+    } = item;
+    Modal.info({
+      title: hospitalName,
+      content: (
+        <div>
+          <p>{pruchaseInfo || '还没有填写备注'}</p>
+        </div>
+      ),
+      onOk() {},
+    });
+  };
+
   render() {
     const {
       orderForm: { orderList },
@@ -60,15 +76,22 @@ class CardList extends PureComponent {
                 <Card
                   hoverable
                   className={styles.card}
-                  actions={[<a onClick={() => this.handlerDistribution(item)}>立即配货</a>]}
+                  actions={[<div onClick={() => this.handlerDistribution(item)}>立即配货</div>]}
                 >
                   <Card.Meta
-                    title={<a>{item.hospitalBase.hospitalName}</a>}
+                    title={
+                      <a>
+                        <span>{item.hospitalBase.hospitalName}</span>
+                        <Tag color="cyan" onClick={() => this.info(item)}>
+                          备注
+                        </Tag>
+                      </a>
+                    }
                     description={
                       <div>
-                        <div style={{ marginBottom: '10px' }}>
-                          {`科室:${item.deptBase ? item.deptBase.deptName : '-'}`}
-                        </div>
+                        <div>{`科室:${item.deptBase ? item.deptBase.deptName : '-'}`}</div>
+                        <div>{`订货时间:${item.creatDate ? item.creatDate : '-'}`}</div>
+                        <div>{`到货时间:${item.arriveDate ? item.arriveDate : '-'}`}</div>
                       </div>
                     }
                   />

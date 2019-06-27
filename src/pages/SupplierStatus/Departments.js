@@ -22,17 +22,6 @@ class Departments extends PureComponent {
     });
   };
 
-  editHandler = (id, values) => {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'departments/editor',
-      payload: {
-        ...values,
-        goodsId: id,
-      },
-    });
-  };
-
   pageChangeHandler = page => {
     const {
       dispatch,
@@ -40,7 +29,7 @@ class Departments extends PureComponent {
     } = this.props;
     dispatch(
       routerRedux.push({
-        pathname: '/backstage/goods-board',
+        pathname: '/backstage/Supplier-Status/departments',
         query: { nowPage: page, pageSize },
       })
     );
@@ -73,6 +62,12 @@ class Departments extends PureComponent {
         dataIndex: 'dirBase',
         key: 'dirBase',
         render: (text, record) => record.deptBase.deptName,
+      },
+      {
+        title: '医院',
+        dataIndex: 'hospitalName',
+        key: 'hospitalName',
+        render: (text, record) => record.hospitalBase.hospitalName,
       },
       {
         title: '到期时间',

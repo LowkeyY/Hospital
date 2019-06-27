@@ -3,9 +3,9 @@ import { connect } from 'dva';
 import { Modal, Table, Button, Popconfirm } from 'antd';
 import styles from './OrderingModal.less';
 
-@connect(({ hospitalOrderRecord, loading }) => ({
-  hospitalOrderRecord,
-  orderLoading: loading.effects['hospitalOrderRecord/fetchOrder'],
+@connect(({ backstageOrder, loading }) => ({
+  backstageOrder,
+  orderLoading: loading.effects['backstageOrder/fetchOrder'],
 }))
 class OrderingModal extends Component {
   constructor(props) {
@@ -35,7 +35,7 @@ class OrderingModal extends Component {
   handlerRecallClick = purchaseId => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'hospitalOrderRecord/recall',
+      type: 'backstageOrder/recall',
       payload: {
         purchaseId,
       },
@@ -48,7 +48,7 @@ class OrderingModal extends Component {
   render() {
     const {
       children,
-      hospitalOrderRecord: { orderList },
+      backstageOrder: { orderList },
       orderLoading,
       record: { state, purchaseId },
     } = this.props;

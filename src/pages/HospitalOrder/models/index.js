@@ -26,9 +26,15 @@ export default {
     overdueList: [],
     suppilerId: '',
     shopList: JSON.parse(localStorage.getItem(`shop${localStorage.getItem('userId')}`)) || [],
+    quickLhopList: [],
     totalCount: '',
     nowPage: '1',
     pageSize: '10',
+    infos: {},
+    hasButton: true,
+    deptId: '',
+    count: '',
+    earlyCount: '',
   },
   reducers: {
     updateState(state, { payload }) {
@@ -50,6 +56,12 @@ export default {
       return {
         ...state,
         shopList: state.shopList.filter(item => item.goodsId !== action.payload),
+      };
+    },
+    deleteQuickItem(state, action) {
+      return {
+        ...state,
+        quickLhopList: state.quickLhopList.filter(item => item.goodsId !== action.payload),
       };
     },
   },
@@ -87,6 +99,13 @@ export default {
         payload: goodsId,
       });
     },
+    *deleteQuickGoods({ payload }, { put }) {
+      const { goodsId } = payload;
+      yield put({
+        type: 'deleteQuickItem',
+        payload: goodsId,
+      });
+    },
     *addOrder({ payload }, { call, put }) {
       const { success, msg } = yield call(Service.addOrder, payload);
       if (success) {
@@ -119,10 +138,7 @@ export default {
         yield put({
           type: 'updateState',
           payload: {
-            shortageList: getList(data.data),
-            totalCount: data.totalCount,
-            nowPage: data.nowPage,
-            pageSize: data.pageSize,
+            shortageList: getList(data),
           },
         });
       } else {
@@ -161,21 +177,116 @@ export default {
         message.error(msg || '请稍后再试');
       }
     },
+
+    *queryInfos({ payload }, { call, put }) {
+      const { data, success, msg } = yield call(Service.queryInfos, payload);
+      if (success) {
+        if (data) {
+          yield put({
+            type: 'updateState',
+            payload: {
+              infos: data,
+            },
+          });
+        }
+      } else {
+        message.error(msg || '请稍后再试');
+      }
+    },
+
+    *queryQuickList({ payload }, { call, put }) {
+      const { data, success, msg } = yield call(Service.queryQuickList, payload);
+      if (success) {
+        if (data) {
+          yield put({
+            type: 'updateState',
+            payload: {
+              quickLhopList: getList(data),
+            },
+          });
+        }
+      } else {
+        message.error(msg || '请稍后再试');
+      }
+    },
+
+    *addGoodsConfig({ payload }, { call }) {
+      const { success, msg } = yield call(Service.addGoodsConfig, payload);
+      if (success) {
+        // yield put({ type: 'fetch' });
+        message.success('配置成功');
+      } else {
+        message.error(msg || '请稍后再试');
+      }
+    },
+    *updateCongif({ payload }, { call, put }) {
+      const { data, success, msg } = yield call(Service.updateCongif, payload);
+      if (success) {
+        // yield put({ type: 'fetch' });
+        message.success('配置成功');
+      } else {
+        message.error(msg || '请稍后再试');
+      }
+    },
+
+    *report({ payload: values }, { call, put, select }) {
+      const { nowPage, pageSize } = yield select(_ => _.hospitalOrder);
+      const data = yield call(Service.report, values);
+      if (data.success) {
+        yield put({ type: 'fetchOverdue', payload: { nowPage, pageSize } });
+        message.success('已报损');
+      } else {
+        message.error(data.msg || '请稍后再试');
+      }
+    },
+
+    *fetchCount({ payload }, { call, put, select }) {
+      const { data, success, msg } = yield call(Service.queryCount, payload);
+      if (success) {
+        yield put({
+          type: 'updateState',
+          payload: {
+            count: data,
+          },
+        });
+      } else {
+        message.error(msg || '请稍后再试');
+      }
+    },
+
+    *fetchEarlyCount({ payload }, { call, put }) {
+      const { data, success, msg } = yield call(Service.queryEarlyWarning, payload);
+      if (success) {
+        yield put({
+          type: 'updateState',
+          payload: {
+            earlyCount: data.totalCount,
+          },
+        });
+      } else {
+        message.error(msg || '请稍后再试');
+      }
+    },
   },
   subscriptions: {
     setup({ dispatch, history }) {
-      return history.listen(({ pathname, query }) => {
-        if (pathname === '/backstage/hospital-order/inventory') {
-          dispatch({ type: 'fetchInventory', payload: query });
+      return history.listen(({ pathname }) => {
+        if (pathname === '/backstage/hospital-ordering') {
+          dispatch({
+            type: 'updateState',
+            payload: {
+              goodsList: [],
+              suppilerId: '',
+              shopList:
+                JSON.parse(localStorage.getItem(`shop${localStorage.getItem('userId')}`)) || [],
+            },
+          });
         }
-        if (pathname === '/backstage/hospital-order/shortage') {
-          dispatch({ type: 'fetchShortage', payload: query });
+        if (pathname.search('hospital-order') !== -1) {
+          dispatch({ type: 'updateState', payload: { hasButton: false } });
         }
-        if (pathname === '/backstage/hospital-order/early-warning') {
-          dispatch({ type: 'fetchEarlyWarning', payload: query });
-        }
-        if (pathname === '/backstage/hospital-order/overdue') {
-          dispatch({ type: 'fetchOverdue', payload: query });
+        if (pathname.search('hospital-dispose-manage') !== -1) {
+          dispatch({ type: 'updateState', payload: { hasButton: true } });
         }
       });
     },

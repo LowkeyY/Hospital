@@ -130,7 +130,15 @@ class SupplierUser extends PureComponent {
         title: '性别',
         dataIndex: 'userSex',
         key: 'userSex',
-        render: (text, record) => (record.userSex === '0' ? '男' : '女'),
+        render: (text, record) => {
+          if (record.userSex === '0') {
+            return '男';
+          }
+          if (record.userSex === '1') {
+            return '女';
+          }
+          return '-';
+        },
       },
       {
         title: '年龄',

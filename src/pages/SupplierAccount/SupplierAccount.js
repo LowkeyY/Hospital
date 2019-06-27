@@ -137,8 +137,26 @@ class SupplierAccount extends Component {
       conractsAddress = '',
     } = data;
     const formItemLayout = {
-      labelCol: { span: 8 },
-      wrapperCol: { span: 8 },
+      labelCol: {
+        xs: { span: 4 },
+        sm: { span: 6 },
+      },
+      wrapperCol: {
+        xs: { span: 8 },
+        sm: { span: 10 },
+      },
+    };
+    const tailFormItemLayout = {
+      wrapperCol: {
+        xs: {
+          span: 24,
+          offset: 6,
+        },
+        sm: {
+          span: 16,
+          offset: 6,
+        },
+      },
     };
 
     const businessProps = {
@@ -206,44 +224,44 @@ class SupplierAccount extends Component {
     return (
       <PageHeaderWrapper>
         <div justify="space-around">
-          <Form horizontal onSubmit={this.handlerSubmit}>
-            <FormItem {...formItemLayout} label="所在机构全称" hasFeedback={!disabled}>
+          <Form {...formItemLayout} horizontal onSubmit={this.handlerSubmit}>
+            <FormItem label="所在机构全称" hasFeedback={!disabled}>
               {getFieldDecorator('suppilerName', {
                 initialValue: suppilerName,
                 rules: [{ required: true, message: '请输入所在机构' }],
               })(<Input disabled={disabled} />)}
             </FormItem>
-            <FormItem {...formItemLayout} label="公司简称" hasFeedback={!disabled}>
+            <FormItem label="公司简称" hasFeedback={!disabled}>
               {getFieldDecorator('suppilerShortName', {
                 initialValue: suppilerShortName,
                 rules: [{ required: true, message: '请输入公司简称' }],
               })(<Input disabled={disabled} />)}
             </FormItem>
-            <FormItem {...formItemLayout} label="许可证号" hasFeedback={!disabled}>
+            <FormItem label="许可证号" hasFeedback={!disabled}>
               {getFieldDecorator('suppilerLicense', {
                 initialValue: suppilerLicense,
                 rules: [{ required: true, message: '请输入许可证号' }],
               })(<Input disabled={disabled} />)}
             </FormItem>
-            <FormItem {...formItemLayout} label="联系人" hasFeedback={!disabled}>
+            <FormItem label="联系人" hasFeedback={!disabled}>
               {getFieldDecorator('conractsName', {
                 initialValue: conractsName,
                 rules: [{ required: true, message: '请输入联系人' }],
               })(<Input disabled={disabled} />)}
             </FormItem>
-            <FormItem {...formItemLayout} label="联系人手机号" hasFeedback={!disabled}>
+            <FormItem label="联系人手机号" hasFeedback={!disabled}>
               {getFieldDecorator('conractsPhone', {
                 initialValue: conractsPhone,
                 rules: [{ required: true, message: '请输入联系人手机号' }],
               })(<Input disabled={disabled} />)}
             </FormItem>
-            <FormItem {...formItemLayout} label="联系邮箱" hasFeedback={!disabled}>
+            <FormItem label="联系邮箱" hasFeedback={!disabled}>
               {getFieldDecorator('conractsEmail', {
                 initialValue: conractsEmail,
                 rules: [{ required: false, message: '请输入联系人邮箱' }],
               })(<Input disabled={disabled} />)}
             </FormItem>
-            <FormItem {...formItemLayout} label="联系地址" hasFeedback={!disabled}>
+            <FormItem label="联系地址" hasFeedback={!disabled}>
               {getFieldDecorator('conractsAddress', {
                 initialValue: conractsAddress,
                 rules: [{ required: false, message: '请输入联系人手机号' }],
@@ -259,7 +277,7 @@ class SupplierAccount extends Component {
                   上传
                 </Button>
               </Upload>
-              <Divider orientation="left">医疗器械经营许可证</Divider>
+              <Divider orientation="left">医疗器械经营许可证/备案信息</Divider>
               <Upload {...medicalProps}>
                 <Button disabled={disabled}>
                   <Icon type="upload" />
@@ -269,7 +287,7 @@ class SupplierAccount extends Component {
             </Col>
           </Row>
           <Row type="flex" justify="end" style={{ marginTop: '30px' }}>
-            <Col span={8}>
+            <Col span={18} offset={2}>
               <span style={{ marginRight: '20px', display: disabled ? 'none' : 'inline-block' }}>
                 <Button onClick={this.handlerCancel}>取消</Button>
               </span>

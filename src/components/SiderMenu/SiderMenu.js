@@ -2,6 +2,7 @@ import React, { PureComponent, Suspense } from 'react';
 import { Layout } from 'antd';
 import classNames from 'classnames';
 import Link from 'umi/link';
+import { connect } from 'dva';
 import styles from './index.less';
 import PageLoading from '../PageLoading';
 import { getDefaultCollapsedSubMenus } from './SiderMenuUtils';
@@ -12,6 +13,9 @@ const { Sider } = Layout;
 
 let firstMount = true;
 
+@connect(({ global }) => ({
+  global,
+}))
 export default class SiderMenu extends PureComponent {
   constructor(props) {
     super(props);
@@ -54,7 +58,15 @@ export default class SiderMenu extends PureComponent {
   };
 
   render() {
-    const { logo, collapsed, onCollapse, fixSiderbar, theme, isMobile } = this.props;
+    const {
+      logo,
+      collapsed,
+      onCollapse,
+      fixSiderbar,
+      theme,
+      isMobile,
+      global: { orderCount, supplierCount },
+    } = this.props;
     const { openKeys } = this.state;
     const defaultProps = collapsed ? {} : { openKeys };
 
@@ -90,6 +102,8 @@ export default class SiderMenu extends PureComponent {
             handleOpenChange={this.handleOpenChange}
             onOpenChange={this.handleOpenChange}
             style={{ padding: '16px 0', width: '100%' }}
+            orderCount={orderCount}
+            supplierCount={supplierCount}
             {...defaultProps}
           />
         </Suspense>

@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
-import { Modal, Table, Button } from 'antd';
+import { Modal, Table } from 'antd';
 import styles from './OrderingModal.less';
 
-@connect(({ supplierOrder, loading }) => ({
-  supplierOrder,
-  orderLoading: loading.effects['supplierOrder/fetchOrder'],
+@connect(({ supplierDistribution, loading }) => ({
+  supplierDistribution,
+  orderLoading: loading.effects['supplierDistribution/fetchOrder'],
 }))
 class OrderingModal extends Component {
   constructor(props) {
@@ -37,7 +37,7 @@ class OrderingModal extends Component {
   render() {
     const {
       children,
-      supplierOrder: { supplierOrderList },
+      supplierDistribution: { supplierOrderList },
       orderLoading,
     } = this.props;
     const { visible } = this.state;

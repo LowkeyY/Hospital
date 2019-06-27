@@ -85,12 +85,6 @@ class HospitalModal extends Component {
                 rules: [{ required: true, message: '医院名称不能为空' }],
               })(<Input />)}
             </FormItem>
-            <FormItem {...formItemLayout} label="邀请码" hasFeedback>
-              {getFieldDecorator('registCode', {
-                initialValue: registCode,
-                rules: [{ required: true, message: '邀请码不能为空' }],
-              })(<Input />)}
-            </FormItem>
             <Form.Item {...formItemLayout} label="选择业务员" hasFeedback>
               {getFieldDecorator('slsmUserId', {
                 initialValue: '',

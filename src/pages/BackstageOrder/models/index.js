@@ -65,6 +65,16 @@ export default {
         message.error(msg || '请稍后再试');
       }
     },
+    *recall({ payload }, { call, put, select }) {
+      const { nowPage, pageSize } = yield select(_ => _.backstageOrder);
+      const { success, msg } = yield call(Service.recall, payload);
+      if (success) {
+        yield put({ type: 'fetch', payload: { nowPage, pageSize } });
+        message.success('已撤回该订单');
+      } else {
+        message.error(msg || '请稍后再试');
+      }
+    },
   },
   subscriptions: {
     setup({ dispatch, history }) {

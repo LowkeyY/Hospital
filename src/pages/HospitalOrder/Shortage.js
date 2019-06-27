@@ -1,7 +1,7 @@
 import { connect } from 'dva';
 import React, { PureComponent } from 'react';
 import { Table, Pagination } from 'antd';
-import { routerRedux } from 'dva/router';
+import SearchForm from './components/SearchForm';
 import styles from './HospitalOrder.less';
 
 @connect(({ loading, hospitalOrder }) => ({
@@ -9,35 +9,91 @@ import styles from './HospitalOrder.less';
   loading: loading.effects['hospitalOrder/fetchShortage'],
 }))
 class Shortage extends PureComponent {
-  componentDidMount() {}
-
-  pageChangeHandler = page => {
+  componentDidMount() {
+    const deptType = localStorage.getItem('deptType');
     const {
       dispatch,
-      hospitalOrder: { pageSize },
+      hospitalOrder: { deptId },
     } = this.props;
-    dispatch(
-      routerRedux.push({
-        pathname: '/backstage/hospital-order/shortage',
-        query: { nowPage: page, pageSize },
-      })
-    );
+    if (deptType !== '2' || deptId !== '') {
+      dispatch({
+        type: 'hospitalOrder/fetchShortage',
+        payload: {
+          deptId,
+        },
+      });
+    }
+  }
+
+  handlerSubmit = (record, values) => {
+    const {
+      dispatch,
+      hospitalOrder: { infos },
+    } = this.props;
+    if (infos === {}) {
+      dispatch({
+        type: 'hospitalOrder/addGoodsConfig',
+        payload: {
+          ...values,
+          goodsId: record.goodsId,
+          suppilerId: record.suppilerBase.suppilerId,
+        },
+      });
+    } else {
+      dispatch({
+        type: 'hospitalOrder/updateCongif',
+        payload: {
+          ...values,
+          goodsId: record.goodsId,
+          configId: infos.configId,
+          suppilerId: record.suppilerBase.suppilerId,
+        },
+      });
+    }
   };
 
-  onShowSizeChange = (current, pageSize) => {
+  handlerGetInfoClick = () => {
     const { dispatch } = this.props;
+    dispatch({
+      type: 'hospitalOrder/queryInfos',
+    });
+  };
+
+  hanlerReset = () => {
+    const {
+      dispatch,
+      hospitalOrder: { deptId },
+    } = this.props;
     dispatch({
       type: 'hospitalOrder/fetchShortage',
       payload: {
-        nowPage: current,
-        pageSize,
+        deptId,
+      },
+    });
+  };
+
+  handlerSearch = values => {
+    const {
+      dispatch,
+      hospitalOrder: { deptId },
+    } = this.props;
+    const { goodsName = '', suppilerId = '' } = values;
+    const res = {
+      surplusNumber: goodsName === '' ? undefined : goodsName,
+      suppilerId: suppilerId === '' ? undefined : suppilerId,
+      deptId,
+    };
+    dispatch({
+      type: 'hospitalOrder/fetchShortage',
+      payload: {
+        ...res,
       },
     });
   };
 
   render() {
     const {
-      hospitalOrder: { shortageList, totalCount, nowPage, pageSize },
+      hospitalOrder: { shortageList },
       loading,
     } = this.props;
     const columns = [
@@ -45,71 +101,85 @@ class Shortage extends PureComponent {
         title: '货品名称',
         dataIndex: 'goodsName',
         key: 'goodsName',
-        // render: (text, record) => (
-        //   record.hospitalBase.hospitalName
-        // ),
+        width: 200,
+        fixed: 'left',
+        render: (text, record) => record.goodsBase.goodsNameCn,
       },
       {
         title: '规格',
         dataIndex: 'goodsSpec',
         key: 'goodsSpec',
+        render: (text, record) => record.goodsBase.goodsSpec,
       },
       {
         title: '单位',
         dataIndex: 'goodsUnit',
         key: 'goodsUnit',
-      },
-      {
-        title: '数量',
-        dataIndex: 'goodsNumber',
-        key: 'goodsNumber',
-      },
-      {
-        title: '批号',
-        dataIndex: 'batchNumber',
-        key: 'batchNumber',
-      },
-      {
-        title: '有效期',
-        dataIndex: 'termOfValidity',
-        key: 'termOfValidity',
+        render: (text, record) => record.goodsBase.goodsUnit,
       },
       {
         title: '方法学',
-        dataIndex: 'methodBase',
-        key: 'methodBase',
-        render: (text, record) => record.methodBase.methodName || '',
+        dataIndex: 'methodName',
+        key: 'methodName',
+        render: (text, record) => record.goodsBase.methodBase.methodName,
+      },
+      {
+        title: '产地',
+        dataIndex: 'isImportef',
+        key: 'isImportef',
+        render: (text, record) => (record.isImportef === '0' ? '进口' : '国产'),
       },
       {
         title: '厂家',
         dataIndex: 'manufacturer',
         key: 'manufacturer',
+        render: (text, record) => record.goodsBase.manufacturer,
       },
       {
-        title: '供应商',
-        dataIndex: 'suppilerName',
-        key: 'suppilerName',
-        render: (text, record) => record.suppilerBase.suppilerName,
+        title: '标准库存值',
+        dataIndex: 'inventoryValue',
+        key: 'inventoryValue',
+        render: (text, record) => (
+          <span style={{ color: 'red' }}>{record.libraryConfig.inventoryValue}</span>
+        ),
       },
+      {
+        title: '剩余数量',
+        dataIndex: 'surplusNumber',
+        key: 'surplusNumber',
+        render: (text, record) => <span style={{ color: 'red' }}>{record.surplusNumber}</span>,
+      },
+      {
+        title: '缺货数量',
+        dataIndex: 'shortageNumber',
+        key: 'shortageNumber',
+        render: (text, record) => <span style={{ color: 'red' }}>{record.shortageNumber}</span>,
+      },
+
+      // {
+      //   title: '操作',
+      //   key: 'order',
+      //   render: (text, record) => (
+      //     <Modal record={record} infos={infos} onOk={values => this.handlerSubmit(record, values)}>
+      //       <Button size="small" onClick={() => this.handlerGetInfoClick()}>
+      //         库存配置
+      //       </Button>
+      //     </Modal>
+      //   ),
+      // },
     ];
     return (
       <div className={styles.commonList}>
+        <div className={styles.tableForm}>
+          <SearchForm onOk={this.handlerSearch} onReset={this.hanlerReset} />
+        </div>
         <Table
           columns={columns}
           dataSource={shortageList}
-          rowKey={record => record.id}
+          rowKey={record => record.goodsId}
           loading={loading}
           pagination={false}
-          onChange={this.pageChangeHandler}
-        />
-        <Pagination
-          className="ant-table-pagination"
-          total={totalCount * 1}
-          current={nowPage * 1}
-          pageSize={pageSize * 1}
-          onChange={this.pageChangeHandler}
-          showSizeChanger
-          onShowSizeChange={this.onShowSizeChange}
+          scroll={{ x: 1300 }}
         />
       </div>
     );

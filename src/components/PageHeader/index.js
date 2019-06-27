@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { Tabs, Skeleton, Button } from 'antd';
+import { Tabs, Skeleton, Button, Badge } from 'antd';
 import classNames from 'classnames';
 import styles from './index.less';
 import BreadcrumbView from './breadcrumb';
@@ -70,7 +70,14 @@ export default class PageHeader extends PureComponent {
                 tabBarExtraContent={tabBarExtraContent}
               >
                 {tabList.map(item => (
-                  <TabPane tab={item.tab} key={item.key} />
+                  <TabPane
+                    tab={
+                      <Badge count={item.count} overflowCount={100} offset={[6, -2]}>
+                        {item.tab}
+                      </Badge>
+                    }
+                    key={item.key}
+                  />
                 ))}
               </Tabs>
             ) : null}

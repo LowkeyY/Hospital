@@ -192,3 +192,16 @@ export const importCDN = (url, name) =>
     };
     document.head.appendChild(dom);
   });
+
+export function trim(str) {
+  //删除左右两端的空格
+  return str.replace(/(^\s*)|(\s*$)/g, '');
+}
+
+export function duringDay(date) {
+  const s1 = new Date(date.replace(/-/g, '/'));
+  const s2 = new Date();
+  const days = s1.getTime() - s2.getTime();
+  const time = parseInt(days / (1000 * 60 * 60 * 24));
+  return `${time}天`;
+}

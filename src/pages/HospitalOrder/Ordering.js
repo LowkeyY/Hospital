@@ -1,9 +1,25 @@
 import { connect } from 'dva';
 import React, { PureComponent } from 'react';
-import { Table, Button, InputNumber, Empty } from 'antd';
+import { Table, Button, InputNumber, Empty, Form, Modal, DatePicker, Alert, Input } from 'antd';
+import moment from 'moment';
 import OrderingModal from './components/OrderingModal';
+import 'moment/locale/zh-cn';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import styles from './Ordering.less';
+
+const FormItem = Form.Item;
+moment.locale('zh-cn');
+const { TextArea } = Input;
+const formItemLayout = {
+  labelCol: {
+    xs: { span: 24 },
+    sm: { span: 4 },
+  },
+  wrapperCol: {
+    xs: { span: 24 },
+    sm: { span: 16 },
+  },
+};
 
 const getShopList = arr => {
   const result = [];
@@ -31,7 +47,10 @@ const getShopList = arr => {
   hospitalOrder,
   loading,
 }))
+@Form.create()
 class Ordering extends PureComponent {
+  state = { visible: false };
+
   componentDidMount() {
     const { dispatch } = this.props;
   }
@@ -48,17 +67,70 @@ class Ordering extends PureComponent {
     }
   }
 
+  showModal = () => {
+    const { form } = this.props;
+    const validates = Object.keys(form.getFieldsValue()).filter(item => item.match('goodsNumber'));
+    form.validateFields(validates, error => {
+      if (error) {
+        return;
+      }
+      this.setState({
+        visible: true,
+      });
+    });
+  };
+
+  handleCancel = e => {
+    this.setState({
+      visible: false,
+    });
+  };
+
   addOrder = () => {
     const {
       dispatch,
-      hospitalOrder: { shopList },
+      form,
+      hospitalOrder: { shopList, deptId },
     } = this.props;
-    dispatch({
-      type: 'hospitalOrder/addOrder',
-      payload: {
-        orderData: JSON.stringify(getShopList(shopList)),
-      },
+    form.validateFields((error, values) => {
+      if (error) {
+        return;
+      }
+      dispatch({
+        type: 'hospitalOrder/addOrder',
+        payload: {
+          orderData: JSON.stringify(getShopList(shopList)),
+          arriveDate: values.arriveDate.format('YYYY-MM-DD'),
+          pruchaseInfo: values.pruchaseInfo,
+          deptId,
+        },
+      });
+      form.resetFields();
+      this.setState({
+        visible: false,
+      });
     });
+  };
+
+  renderDate = () => {
+    const {
+      form: { getFieldDecorator },
+    } = this.props;
+    return (
+      <Form {...formItemLayout} style={{ marginTop: '20px' }} onSubmit={this.addOrder}>
+        <FormItem label="到货时间">
+          {getFieldDecorator('arriveDate', {
+            initialValue: '',
+            rules: [{ required: true, message: '请选择到货时间' }],
+          })(<DatePicker />)}
+        </FormItem>
+        <FormItem label="备注" placeholder="请输入...">
+          {getFieldDecorator('pruchaseInfo', {
+            initialValue: '',
+          })(<TextArea rows={4} />)}
+        </FormItem>
+      </Form>
+    );
   };
 
   changeNum = (value, record) => {
@@ -84,7 +156,7 @@ class Ordering extends PureComponent {
 
   render() {
     const {
-      hospitalOrder: { shopList },
+      hospitalOrder: { shopList, deptId },
     } = this.props;
     const columns = [
       {
@@ -98,11 +170,6 @@ class Ordering extends PureComponent {
         key: 'goodsNameCn',
       },
       {
-        title: '厂家',
-        dataIndex: 'manufacturer',
-        key: 'manufacturer',
-      },
-      {
         title: '规格',
         dataIndex: 'goodsSpec',
         key: 'goodsSpec',
@@ -113,17 +180,49 @@ class Ordering extends PureComponent {
         key: 'goodsUnit',
       },
       {
+        title: '方法学',
+        dataIndex: 'methodName',
+        key: 'methodName',
+        render: (text, record) => record.methodBase.methodName,
+      },
+      {
+        title: '厂家',
+        dataIndex: 'manufacturer',
+        key: 'manufacturer',
+      },
+      {
+        title: '产地',
+        dataIndex: 'isImportef',
+        key: 'isImportef',
+        render: (text, record) => (record.isImportef === '0' ? '进口' : '国产'),
+      },
+      {
         title: '数量',
         dataIndex: 'goodsNumber',
         key: 'goodsNumber',
-        render: (text, record) => (
-          <InputNumber
-            key={record.goodsId}
-            min={1}
-            defaultValue={record.goodsNumber}
-            onChange={value => this.changeNum(value, record)}
-          />
-        ),
+        render: (text, record) => {
+          const { form } = this.props;
+          const { getFieldDecorator } = form;
+          return (
+            <Form className={styles.form}>
+              <FormItem>
+                {getFieldDecorator(`goodsNumber_${record.goodsId}`, {
+                  initialValue: '',
+                  rules: [
+                    { required: true, message: '数量必须输入' },
+                    { pattern: /^(?!00)(?:[0-9]{1,3}|1000)$/, message: '数量不能大于1000' },
+                  ],
+                })(
+                  <InputNumber
+                    key={record.goodsId}
+                    min={1}
+                    onChange={value => this.changeNum(value, record)}
+                  />
+                )}
+              </FormItem>
+            </Form>
+          );
+        },
       },
       {
         title: '操作',
@@ -136,16 +235,16 @@ class Ordering extends PureComponent {
       },
     ];
     return (
-      <PageHeaderWrapper>
+      <PageHeaderWrapper title="订货">
         <div className={styles.commonList}>
           <div className={styles.buttonBox}>
-            <OrderingModal onOk={this.handlerOkClick}>
+            <OrderingModal onOk={this.handlerOkClick} deptId={deptId}>
               <Button type="primary" style={{ marginBottom: '10px' }}>
                 添加货品
               </Button>
             </OrderingModal>
             {shopList.length > 0 ? (
-              <Button type="primary" style={{ marginBottom: '10px' }} onClick={this.addOrder}>
+              <Button type="primary" style={{ marginBottom: '10px' }} onClick={this.showModal}>
                 提交订单
               </Button>
             ) : null}
@@ -156,7 +255,7 @@ class Ordering extends PureComponent {
                 title={() => item.suppilerName}
                 columns={columns}
                 dataSource={item.details || []}
-                rowKey={record => record.id}
+                rowKey={record => record.goodsId}
                 pagination={false}
               />
             ))
@@ -164,6 +263,15 @@ class Ordering extends PureComponent {
             <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="订单空空如也" />
           )}
         </div>
+        <Modal
+          title="提交订货单"
+          visible={this.state.visible}
+          onOk={this.addOrder}
+          onCancel={this.handleCancel}
+        >
+          <Alert message="提交后不可修改" type="info" />
+          {this.renderDate()}
+        </Modal>
       </PageHeaderWrapper>
     );
   }

@@ -1,5 +1,5 @@
 import fetch from 'dva/fetch';
-import { notification } from 'antd';
+import { notification, Icon } from 'antd';
 import router from 'umi/router';
 import { parse, stringify } from 'qs';
 import hash from 'hash.js';
@@ -28,10 +28,6 @@ const checkStatus = response => {
     return response;
   }
   if (response.status === 403) {
-    notification.error({
-      message: '登陆过期',
-      description: '请重新登陆',
-    });
   } else {
     notification.error({
       message: `请求错误 ${response.status}: ${response.url}`,
@@ -96,7 +92,7 @@ export default function request(url, option) {
     newOptions.method === 'DELETE'
   ) {
     if (!(newOptions.body instanceof FormData)) {
-      //需要修改默认请求头
+      // 需要修改默认请求头
       newOptions.headers = {
         Accept: 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
@@ -144,7 +140,6 @@ export default function request(url, option) {
         const status = e.name;
         if (status === 403) {
           router.push('/user/login');
-          return;
         }
       })
   );

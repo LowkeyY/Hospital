@@ -23,6 +23,7 @@ export default {
     totalCount: '',
     nowPage: '1',
     pageSize: '10',
+    deptId: '',
   },
   reducers: {
     updateState(state, { payload }) {
@@ -70,7 +71,6 @@ export default {
     setup({ dispatch, history }) {
       return history.listen(({ pathname, query }) => {
         if (pathname === '/backstage/hospital-distribution-list') {
-          dispatch({ type: 'fetch', payload: query });
         }
       });
     },

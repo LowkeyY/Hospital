@@ -44,6 +44,12 @@ class HeaderView extends Component {
   handleMenuClick = ({ key }) => {
     const { dispatch } = this.props;
     if (key === 'setting') {
+      dispatch({
+        type: 'global/updateState',
+        payload: {
+          pwdVisble: true,
+        },
+      });
     }
     if (key === 'logout') {
       dispatch({

@@ -16,12 +16,21 @@ const getList = arr => {
   return result;
 };
 
+const defaultInfo = {
+  distributor: '',
+  phoneNumber: '',
+  arrivalTime: null,
+  hospitalId: '',
+  deptId: '',
+};
+
 export default {
   namespace: 'addNewDistribution',
   state: {
     goodsList: [],
     distributionList: [],
     totalCount: '',
+    info: defaultInfo,
     hospital: [],
     department: [],
     nowPage: '1',
@@ -67,14 +76,31 @@ export default {
       } else {
         return {
           ...state,
-          list: state.list.concat(payload),
+          distributionList: state.distributionList.concat(payload),
         };
       }
     },
+    addRow(state, { payload }) {
+      const index = state.distributionList.findIndex(item => item.goodsId === payload.goodsId);
+      state.distributionList.splice(index + 1, 0, payload);
+      return {
+        ...state,
+        distributionList: state.distributionList,
+      };
+    },
+    deleteRow(state, { payload }) {
+      return {
+        ...state,
+        distributionList: state.distributionList.filter(item => item.key !== payload),
+      };
+    },
   },
   effects: {
-    *fetchGoods({ payload }, { call, put }) {
-      const { data, success, msg } = yield call(Service.queryGoodsList, payload);
+    *fetchGoods({ payload }, { call, put, select }) {
+      const {
+        info: { deptId },
+      } = yield select(_ => _.addNewDistribution);
+      const { data, success, msg } = yield call(Service.queryGoodsList, { ...payload, deptId });
       if (success) {
         yield put({
           type: 'updateState',
@@ -123,15 +149,38 @@ export default {
     *addDistribution({ payload: values }, { call, put }) {
       const { success, msg } = yield call(Service.addDistribution, values);
       if (success) {
+        yield put({
+          type: 'updateState',
+          payload: {
+            info: defaultInfo,
+          },
+        });
         router.push('/backstage/Add-supplier/result');
       } else {
         message.error(msg || '请稍后再试');
       }
     },
+
+    *deleteGoods({ payload }, { put }) {
+      const { key } = payload;
+      yield put({
+        type: 'deleteRow',
+        payload: key,
+      });
+    },
   },
   subscriptions: {
     setup({ dispatch, history }) {
-      return history.listen(({ pathname, query }) => {});
+      return history.listen(({ pathname }) => {
+        if (pathname.search('backstage/Add-supplier') === -1) {
+          dispatch({
+            type: 'updateState',
+            payload: {
+              info: defaultInfo,
+            },
+          });
+        }
+      });
     },
   },
 };

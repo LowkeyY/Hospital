@@ -4,14 +4,37 @@ import router from 'umi/router';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
+import Department from '../../components/Lowkey/Department';
 import styles from './HospitalOrder.less';
 
-@connect(({ hospitalOrder, loading }) => ({
+@connect(({ hospitalOrder }) => ({
   hospitalOrder,
-  loadHospital: loading.effects['orderForm/applyHospital'],
-  loadDepartment: loading.effects['orderForm/applyDepartment'],
 }))
 class HospitalOrder extends Component {
+  componentDidMount() {
+    const deptType = localStorage.getItem('deptType');
+    const {
+      dispatch,
+      hospitalOrder: { deptId },
+    } = this.props;
+    if (deptType !== '2' || deptId !== '') {
+      dispatch({
+        type: 'hospitalOrder/fetchCount',
+        payload: {
+          deptId,
+        },
+      });
+      dispatch({
+        type: 'hospitalOrder/fetchEarlyCount',
+        payload: {
+          deptId,
+          pageSize: 10,
+          nowPage: 1,
+        },
+      });
+    }
+  }
+
   handleTabChange = key => {
     const { match } = this.props;
     switch (key) {
@@ -33,61 +56,203 @@ class HospitalOrder extends Component {
   };
 
   handlerOrderingClick = () => {
-    const { dispatch } = this.props;
+    const {
+      dispatch,
+      hospitalOrder: { deptId },
+    } = this.props;
     dispatch(
       routerRedux.push({
         pathname: '/backstage/hospital-ordering',
+        query: {
+          deptId,
+        },
       })
     );
   };
 
-  applyDepartmentHandler = values => {
-    const { dispatch } = this.props;
+  handlerQuickOrderingClick = () => {
+    const {
+      dispatch,
+      hospitalOrder: { deptId },
+    } = this.props;
+    dispatch(
+      routerRedux.push({
+        pathname: '/backstage/hospital-quickordering',
+        query: {
+          deptId,
+        },
+      })
+    );
+  };
+
+  handlerDisposeClick = () => {
+    const {
+      dispatch,
+      hospitalOrder: { deptId },
+    } = this.props;
+    dispatch(
+      routerRedux.push({
+        pathname: '/backstage/hospital-dispose',
+        query: {
+          deptId,
+        },
+      })
+    );
+  };
+
+  hanlerSelect = val => {
+    let route = 'fetchInventory';
+    const {
+      dispatch,
+      location: { pathname = '' },
+    } = this.props;
     dispatch({
-      type: 'orderForm/applyDepartment',
+      type: 'hospitalOrder/updateState',
       payload: {
-        ...values,
+        deptId: val,
       },
+    });
+    dispatch({
+      type: 'hospitalOrder/fetchCount',
+      payload: {
+        deptId: val,
+      },
+    });
+    dispatch({
+      type: 'hospitalOrder/fetchEarlyCount',
+      payload: {
+        deptId: val,
+        nowPage: 1,
+        pageSize: 10,
+      },
+    });
+    if (pathname === '/backstage/hospital-order/Shortage') {
+      route = 'fetchShortage';
+    }
+    if (pathname === '/backstage/hospital-order/early-warning') {
+      route = 'fetchEarlyWarning';
+    }
+    if (pathname === '/backstage/hospital-order/overdue') {
+      route = 'fetchOverdue';
+    }
+
+    dispatch({
+      type: `hospitalOrder/${route}`,
+      payload: {
+        nowPage: 1,
+        pageSize: 10,
+        deptId: val,
+      },
+    });
+    dispatch({
+      type: 'global/getSupplier',
+      payload: { deptId: val },
     });
   };
 
-  render() {
-    const tabList = [
+  getTabList = () => {
+    const {
+      hospitalOrder: { count, earlyCount, hasButton },
+    } = this.props;
+    if (!hasButton) {
+      return [
+        {
+          key: 'Shortage',
+          tab: '缺货清单',
+          count,
+        },
+      ];
+    }
+    return [
       {
         key: 'inventory',
         tab: '库存清单',
+        count: 0,
       },
       {
         key: 'Shortage',
         tab: '缺货清单',
+        count,
       },
       {
         key: 'early-warning',
-        tab: '预警清单',
+        tab: '效期预警',
+        count: earlyCount,
       },
       {
         key: 'overdue',
-        tab: '过期清单',
+        tab: '过期报损',
+        count: 0,
       },
     ];
-    const extraContent = () => {
+  };
+
+  render() {
+    const extraContent = deptType => {
+      const {
+        hospitalOrder: { deptId },
+      } = this.props;
       return (
-        <div>
-          <Button type="primary" style={{ marginRight: '20px' }}>
-            一键补货
-          </Button>
-          <Button type="primary" onClick={this.handlerOrderingClick}>
-            订货
-          </Button>
+        <div className={styles.buttons}>
+          <div>
+            <Button
+              type="primary"
+              style={{ marginRight: '20px' }}
+              onClick={this.handlerQuickOrderingClick}
+              disabled={deptType === '2' && deptId === ''}
+            >
+              一键补货
+            </Button>
+            <Button
+              type="primary"
+              style={{ marginRight: '20px' }}
+              onClick={this.handlerOrderingClick}
+              disabled={deptType === '2' && deptId === ''}
+            >
+              订货
+            </Button>
+          </div>
+          {/*{*/}
+          {/*hasButton ?*/}
+          {/*<div className={styles.dispose}>*/}
+          {/*<Button*/}
+          {/*type="primary"*/}
+          {/*onClick={this.handlerDisposeClick}*/}
+          {/*disabled={deptType === '2' && deptId === ''}*/}
+          {/*>*/}
+          {/*库存配置*/}
+          {/*</Button>*/}
+          {/*</div>*/}
+          {/*:*/}
+          {/*null*/}
+          {/*}*/}
+          <div className={styles.dispose}>
+            <Button
+              type="primary"
+              onClick={this.handlerDisposeClick}
+              disabled={deptType === '2' && deptId === ''}
+            >
+              库存配置
+            </Button>
+          </div>
         </div>
       );
     };
 
-    const { match, children, location } = this.props;
+    const {
+      match,
+      children,
+      location,
+      hospitalOrder: { deptId },
+    } = this.props;
+    const deptType = localStorage.getItem('deptType');
     return (
       <PageHeaderWrapper
-        title={extraContent()}
-        tabList={tabList}
+        title={extraContent(deptType)}
+        content={
+          deptType === '2' ? <Department deptId={deptId} onSelect={this.hanlerSelect} /> : null
+        }
+        tabList={this.getTabList()}
         tabActiveKey={location.pathname.replace(`${match.path}/`, '')}
         onTabChange={this.handleTabChange}
       >

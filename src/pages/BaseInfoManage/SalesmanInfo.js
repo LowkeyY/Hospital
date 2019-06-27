@@ -2,6 +2,7 @@ import { connect } from 'dva';
 import React, { PureComponent } from 'react';
 import { Table, Button, Pagination, Switch, Tag, Icon, Modal } from 'antd';
 import { routerRedux } from 'dva/router';
+import CustomerModal from './components/customerModal';
 import SalesmanModal from './components/salesmanModal';
 import styles from './SalesmanInfo.less';
 
@@ -97,6 +98,16 @@ class SalesmanInfo extends PureComponent {
     });
   };
 
+  handlerCustomer = id => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'salesman/fetchCustomer',
+      payload: {
+        slsmUserId: id,
+      },
+    });
+  };
+
   handlerSwitch = (userId, checked, e) => {
     const { dispatch } = this.props;
     confirm({
@@ -145,7 +156,15 @@ class SalesmanInfo extends PureComponent {
       {
         title: '性别',
         dataIndex: 'userSex',
-        render: (text, record) => (record.userSex === '0' ? '男' : '女'),
+        render: (text, record) => {
+          if (record.userSex === '0') {
+            return '男';
+          }
+          if (record.userSex === '1') {
+            return '女';
+          }
+          return '-';
+        },
       },
       {
         title: '年龄',
@@ -185,6 +204,23 @@ class SalesmanInfo extends PureComponent {
               onChange={checked => this.handlerSwitch(record.userId, checked)}
             />
           </span>
+        ),
+      },
+      {
+        title: '查看统计',
+        key: 'customer',
+        render: (text, record) => (
+          <CustomerModal>
+            <Button
+              style={{ marginRight: '10px' }}
+              type="primary"
+              ghost
+              size="small"
+              onClick={() => this.handlerCustomer(record.userId)}
+            >
+              客户统计
+            </Button>
+          </CustomerModal>
         ),
       },
     ];

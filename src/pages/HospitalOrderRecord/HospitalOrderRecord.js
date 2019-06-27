@@ -1,8 +1,9 @@
 import { connect } from 'dva';
 import React, { PureComponent } from 'react';
 import { Table, Button, Pagination, Tag, Popconfirm } from 'antd';
-import { routerRedux } from 'dva/router';
+import SearchForm from './components/SearchForm';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
+import Department from '../../components/Lowkey/Department';
 import styles from './HospitalOrderRecord.less';
 import OrderingModal from './components/OrderingModal';
 
@@ -11,28 +12,62 @@ import OrderingModal from './components/OrderingModal';
   loading: loading.effects['hospitalOrderRecord/fetch'],
 }))
 class HospitalOrderRecord extends PureComponent {
-  componentDidMount() {}
+  componentDidMount() {
+    const deptType = localStorage.getItem('deptType');
+    const {
+      dispatch,
+      hospitalOrderRecord: { pageSize, deptId },
+    } = this.props;
+    if (deptType !== '2' || deptId !== '') {
+      dispatch({
+        type: 'hospitalOrderRecord/fetch',
+        payload: {
+          nowPage: 1,
+          pageSize,
+          deptId,
+        },
+      });
+    }
+  }
 
   pageChangeHandler = page => {
     const {
       dispatch,
-      hospitalOrderRecord: { pageSize },
+      hospitalOrderRecord: { pageSize, deptId },
     } = this.props;
-    dispatch(
-      routerRedux.push({
-        pathname: '/backstage/hospital-order-record',
-        query: { nowPage: page, pageSize },
-      })
-    );
+    dispatch({
+      type: 'hospitalOrderRecord/updateNowPage',
+      payload: {
+        nowPage: page,
+      },
+    });
+    dispatch({
+      type: 'hospitalOrderRecord/fetch',
+      payload: {
+        nowPage: page,
+        pageSize,
+        deptId,
+      },
+    });
   };
 
   onShowSizeChange = (current, pageSize) => {
-    const { dispatch } = this.props;
+    const {
+      dispatch,
+      hospitalOrderRecord: { deptId },
+    } = this.props;
+    dispatch({
+      type: 'hospitalOrderRecord/updatePageSize',
+      payload: {
+        pageSize,
+      },
+    });
     dispatch({
       type: 'hospitalOrderRecord/fetch',
       payload: {
         nowPage: current,
         pageSize,
+        deptId,
       },
     });
   };
@@ -57,34 +92,122 @@ class HospitalOrderRecord extends PureComponent {
     });
   };
 
+  hanlerReset = () => {
+    const {
+      dispatch,
+      hospitalOrderRecord: { pageSize, deptId },
+    } = this.props;
+    dispatch({
+      type: 'hospitalOrderRecord/fetch',
+      payload: {
+        nowPage: 1,
+        pageSize,
+        deptId,
+      },
+    });
+  };
+
+  handlerSearch = values => {
+    const {
+      dispatch,
+      hospitalOrderRecord: { pageSize, deptId },
+    } = this.props;
+    const {
+      state = '',
+      purchaseSuppilerId = '',
+      purchaseId = '',
+      beginDate = '',
+      endDate = '',
+    } = values;
+    const res = {
+      state: state === '' ? undefined : state,
+      purchaseSuppilerId: purchaseSuppilerId === '' ? undefined : purchaseSuppilerId,
+      purchaseId: purchaseId === '' ? undefined : purchaseId,
+      endDate: endDate === '' ? undefined : endDate,
+      beginDate: beginDate === '' ? undefined : beginDate,
+      nowPage: 1,
+      pageSize,
+      deptId,
+    };
+    dispatch({
+      type: 'hospitalOrderRecord/fetch',
+      payload: {
+        ...res,
+      },
+    });
+  };
+
+  hanlerSelect = val => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'hospitalOrderRecord/updateState',
+      payload: {
+        deptId: val,
+      },
+    });
+    dispatch({
+      type: `hospitalOrderRecord/fetch`,
+      payload: {
+        nowPage: 1,
+        pageSize: 10,
+        deptId: val,
+      },
+    });
+    dispatch({
+      type: 'global/getSupplier',
+      payload: { deptId: val },
+    });
+  };
+
   render() {
     const {
-      hospitalOrderRecord: { list, totalCount, nowPage, pageSize },
+      hospitalOrderRecord: { list, totalCount, nowPage, pageSize, deptId },
       loading,
     } = this.props;
+    const deptType = localStorage.getItem('deptType');
     const columns = [
+      {
+        title: '订货单ID',
+        dataIndex: 'purchaseId',
+        key: 'purchaseId',
+        width: 80,
+        fixed: 'left',
+      },
       {
         title: '科室',
         dataIndex: 'deptName',
         key: 'deptName',
+        fixed: 'left',
         render: (text, record) => record.deptBase.deptName,
       },
       {
         title: '供应商',
         dataIndex: 'suppilerName',
         key: 'suppilerName',
-        render: (text, record) => record.suppilerBase.suppilerName,
+        width: 200,
+        fixed: 'left',
+        render: (text, record) => record.suppilerBase && record.suppilerBase.suppilerName,
       },
       {
-        title: '下单时间',
+        title: '订货时间',
         dataIndex: 'creatDate',
         key: 'creatDate',
+      },
+      {
+        title: '到货时间',
+        dataIndex: 'arriveDate',
+        key: 'arriveDate',
       },
       {
         title: '下单人',
         dataIndex: 'conractsPhone',
         key: 'conractsPhone',
         render: (text, record) => record.userBase.userRealName,
+      },
+      {
+        title: '备注',
+        dataIndex: 'pruchaseInfo',
+        key: 'pruchaseInfo',
       },
       {
         title: '状态',
@@ -106,6 +229,7 @@ class HospitalOrderRecord extends PureComponent {
       {
         title: '操作',
         key: 'operation',
+        fixed: 'right',
         render: (text, record) => (
           <div>
             <Popconfirm title="确定撤回订单吗？" onConfirm={() => this.handlerRecallClick(record)}>
@@ -123,8 +247,15 @@ class HospitalOrderRecord extends PureComponent {
       },
     ];
     return (
-      <PageHeaderWrapper>
+      <PageHeaderWrapper
+        content={
+          deptType === '2' ? <Department deptId={deptId} onSelect={this.hanlerSelect} /> : null
+        }
+      >
         <div className={styles.commonList}>
+          <div className={styles.tableForm}>
+            <SearchForm onOk={this.handlerSearch} onReset={this.hanlerReset} />
+          </div>
           <Table
             columns={columns}
             dataSource={list}
@@ -132,6 +263,7 @@ class HospitalOrderRecord extends PureComponent {
             loading={loading}
             pagination={false}
             onChange={this.pageChangeHandler}
+            scroll={{ x: 1300 }}
           />
           <Pagination
             className="ant-table-pagination"

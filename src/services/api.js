@@ -150,6 +150,47 @@ export async function queryDepartment(params) {
   return request(`/api/dept/getHospitalDeptById?${stringify(params)}`);
 }
 
-export async function querySupplier() {
-  return request(`/api/suppilerApply/getMySuppiler`);
+export async function querySupplier(params) {
+  return request(`/api/suppilerApply/getMySuppiler?${stringify(params)}`);
+}
+
+export async function AvailableHospital(params) {
+  return request(`/api/dept/findHospitalApplyDeptList?${stringify(params)}`);
+}
+
+export async function alipay(params) {
+  return request(`/api/zhifubao/payment?${stringify(params)}`);
+}
+
+export async function alipayResult(params) {
+  return request(`/api/zhifubao/callback?${stringify(params)}`);
+}
+
+export async function queryCount() {
+  return request(`/api/purchase/suppilerGetPurchaseCount`);
+}
+
+export async function querySupplierCount() {
+  return request(`/api/suppilerApply/getMySuppilerApplyCount`);
+}
+
+export async function queryHospitalDept() {
+  return request(`/api/dept/getHospitalDeptByUser`);
+}
+
+export async function editorPwd(params) {
+  return request('/api/user/updateUser', {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+  });
+}
+
+export async function queryAllSupplier() {
+  return request(`/api/suppiler/getAllSuppiler`);
+}
+
+export async function queryAllHospital() {
+  return request(`/api/hospital/getAllHospital`);
 }

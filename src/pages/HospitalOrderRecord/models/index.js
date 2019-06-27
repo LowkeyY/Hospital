@@ -23,6 +23,7 @@ export default {
     totalCount: '',
     nowPage: '1',
     pageSize: '10',
+    deptId: '',
   },
   reducers: {
     updateState(state, { payload }) {
@@ -66,10 +67,10 @@ export default {
       }
     },
     *recall({ payload }, { call, put, select }) {
-      const { nowPage, pageSize } = yield select(_ => _.hospitalOrderRecord);
+      const { nowPage, pageSize, deptId } = yield select(_ => _.hospitalOrderRecord);
       const { success, msg } = yield call(Service.recall, payload);
       if (success) {
-        yield put({ type: 'fetch', payload: { nowPage, pageSize } });
+        yield put({ type: 'fetch', payload: { nowPage, pageSize, deptId } });
         message.success('已撤回该订单');
       } else {
         message.error(msg || '请稍后再试');
@@ -80,7 +81,6 @@ export default {
     setup({ dispatch, history }) {
       return history.listen(({ pathname, query }) => {
         if (pathname === '/backstage/hospital-order-record') {
-          dispatch({ type: 'fetch', payload: query });
         }
       });
     },

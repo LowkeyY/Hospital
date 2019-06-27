@@ -1,5 +1,6 @@
 @import '~@/common.less';
 @import '~antd/lib/style/themes/default.less';
+
 .operation {
   display: flex;
   color: @primary-color;
@@ -7,4 +8,59 @@
     font-size: 20px;
     margin-right: 10px;
   }
+}
+
+.tableForm {
+  :global {
+    .ant-form-item {
+      display: flex;
+      margin-right: 0;
+      margin-bottom: 24px;
+      > .ant-form-item-label {
+        width: auto;
+        padding-right: 8px;
+        line-height: 32px;
+      }
+      .ant-form-item-control {
+        line-height: 32px;
+      }
+    }
+    .ant-form-item-control-wrapper {
+      flex: 1;
+    }
+  }
+  .submitButtons {
+    display: block;
+    margin-bottom: 24px;
+    white-space: nowrap;
+  }
+}
+
+@media screen and (max-width: @screen-lg) {
+  .tableListForm :global(.ant-form-item) {
+    margin-right: 24px;
+  }
+}
+
+@media screen and (max-width: @screen-md) {
+  .tableListForm :global(.ant-form-item) {
+    margin-right: 8px;
+  }
+}
+
+.btn {
+  display: flex;
+  flex-direction: column;
+}
+
+.printTable {
+  :global {
+    .ant-table {
+      font-size: 6px !important;
+    }
+  }
+}
+.Extra {
+  display: flex;
+  justify-content: space-between;
 }

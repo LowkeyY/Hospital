@@ -36,9 +36,9 @@ export default {
   namespace: 'menuManage',
   state: {
     menuTree: [],
-    selectedKey: '',
+    selectedKey: ['0'],
     menuItem: defaultMenuItem,
-    menuRole: [],
+    menuRole: '',
   },
   reducers: {
     updateState(state, { payload }) {
@@ -94,14 +94,26 @@ export default {
         yield put({ type: 'updateMenuItem', payload: data });
         yield put({
           type: 'updateMenuRole',
-          payload: data.menuRoles.split(','),
+          payload: data.menuRoles,
         });
       }
     },
   },
   subscriptions: {
     setup({ dispatch, history }) {
-      return history.listen(({ pathname, query }) => {});
+      return history.listen(({ pathname }) => {
+        if (pathname === '/backstage/access/menu') {
+          dispatch({
+            type: 'updateState',
+            payload: {
+              menuTree: [],
+              selectedKey: ['0'],
+              menuItem: defaultMenuItem,
+              menuRole: '',
+            },
+          });
+        }
+      });
     },
   },
 };

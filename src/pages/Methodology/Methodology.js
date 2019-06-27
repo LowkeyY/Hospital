@@ -78,11 +78,13 @@ class Methodology extends PureComponent {
               record={record}
               onOk={values => this.editHandler(record.methodId, values)}
             >
-              <Icon className={styles.icon} type="edit" />
+              <Button type="primary" ghost size="small">
+                编辑
+              </Button>
             </MethodologyModal>
-            <Popconfirm title="确定删除?" onConfirm={() => this.deleteMethod(record.methodId)}>
-              <Icon className={styles.icon} type="delete" />
-            </Popconfirm>
+            {/*<Popconfirm title="确定删除?" onConfirm={() => this.deleteMethod(record.methodId)}>*/}
+            {/*<Icon className={styles.icon} type="delete" />*/}
+            {/*</Popconfirm>*/}
           </span>
         ),
       },

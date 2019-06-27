@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
 import { connect } from 'dva';
 import router from 'umi/router';
-import { Row, Col } from 'antd';
+import { Row, Col, Form } from 'antd';
 import Card from './components/Card';
 import styles from './Desktop.less';
 
-@connect(({ login, loading, menu }) => ({
+@connect(({ login, loading, menu, global }) => ({
   login,
   menu,
   submitting: loading.effects['login/login'],
+  global,
 }))
+@Form.create()
 class Desktop extends Component {
   state = {};
 
@@ -18,7 +20,9 @@ class Desktop extends Component {
   };
 
   render() {
-    const { menuData } = this.props.menu;
+    const {
+      menu: { menuData },
+    } = this.props;
     return (
       <div className={styles.main}>
         <Row justify="space-around">

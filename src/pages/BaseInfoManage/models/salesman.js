@@ -20,6 +20,8 @@ export default {
   state: {
     list: [],
     totalCount: '',
+    customerList: [],
+    supplierList: [],
     nowPage: '1',
     pageSize: '10',
   },
@@ -98,6 +100,32 @@ export default {
         message.success('该用户已停用');
       } else {
         message.error(data.msg || '请稍后再试');
+      }
+    },
+    *fetchCustomer({ payload }, { call, put }) {
+      const { data, success, msg } = yield call(salesmanService.queryCustomer, payload);
+      if (success) {
+        yield put({
+          type: 'updateState',
+          payload: {
+            customerList: getList(data),
+          },
+        });
+      } else {
+        message.error(msg || '请稍后再试');
+      }
+    },
+    *fetchSupplier({ payload }, { call, put }) {
+      const { data, success, msg } = yield call(salesmanService.supplier, payload);
+      if (success) {
+        yield put({
+          type: 'updateState',
+          payload: {
+            supplierList: getList(data),
+          },
+        });
+      } else {
+        message.error(msg || '请稍后再试');
       }
     },
   },

@@ -77,7 +77,7 @@ export default {
   },
   proxy: {
     '/api': {
-      target: `http://111.193.66.13:9200/`,
+      target: `http://www.zskd-kcgl.cn:9200`,
       changeOrigin: true,
       pathRewrite: { '^/api': '' },
     },

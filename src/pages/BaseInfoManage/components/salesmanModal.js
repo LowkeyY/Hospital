@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Modal, Form, Input, Radio } from 'antd';
-import md5 from 'md5';
+import { pattern } from '../../../utils/config';
 
 const FormItem = Form.Item;
 
@@ -30,11 +30,10 @@ class SalesmanModal extends Component {
   okHandler = () => {
     const { onOk, form } = this.props;
     form.validateFields((err, values) => {
-      const { userPwd } = values;
       if (!err) {
         const res = {
           ...values,
-          userPwd: md5(userPwd),
+          userPwd: '123456',
         };
         onOk(res);
         form.resetFields();
@@ -47,14 +46,7 @@ class SalesmanModal extends Component {
     const { children, form, record } = this.props;
     const { visible } = this.state;
     const { getFieldDecorator } = form;
-    const {
-      userName = '',
-      userRealName = '',
-      userPhone = '',
-      userPwd = '',
-      userSex = '0',
-      userAge = '',
-    } = record;
+    const { userRealName = '', userPhone = '', userSex = '0', userAge = '' } = record;
     const formItemLayout = {
       labelCol: { span: 6 },
       wrapperCol: { span: 14 },
@@ -70,12 +62,6 @@ class SalesmanModal extends Component {
           onCancel={this.hideModelHandler}
         >
           <Form horizontal onSubmit={this.okHandler}>
-            <FormItem {...formItemLayout} label="用户名" hasFeedback>
-              {getFieldDecorator('userName', {
-                initialValue: userName,
-                rules: [{ required: true, message: '请输入用户名' }],
-              })(<Input />)}
-            </FormItem>
             <FormItem {...formItemLayout} label="真实姓名" hasFeedback>
               {getFieldDecorator('userRealName', {
                 initialValue: userRealName,
@@ -86,12 +72,6 @@ class SalesmanModal extends Component {
               {getFieldDecorator('userPhone', {
                 initialValue: userPhone,
                 rules: [{ required: true, message: '手机号不能为空' }],
-              })(<Input />)}
-            </FormItem>
-            <FormItem {...formItemLayout} label="密码" hasFeedback>
-              {getFieldDecorator('userPwd', {
-                initialValue: userPwd,
-                rules: [{ required: false, message: '请输入密码' }],
               })(<Input />)}
             </FormItem>
             <Form.Item {...formItemLayout} label="性别">
@@ -107,7 +87,7 @@ class SalesmanModal extends Component {
             <FormItem {...formItemLayout} label="年龄" hasFeedback>
               {getFieldDecorator('userAge', {
                 initialValue: userAge,
-                rules: [{ required: false, message: '请输入正确的年龄' }],
+                rules: [{ pattern: pattern.number.pattern, message: pattern.number.message }],
               })(<Input />)}
             </FormItem>
           </Form>

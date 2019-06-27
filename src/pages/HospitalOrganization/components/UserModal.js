@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import { Modal, Form, Input, Radio, message } from 'antd';
 import md5 from 'md5';
 import { connect } from 'dva';
+import { pattern } from '../../../utils/config';
 
 const FormItem = Form.Item;
 
@@ -115,7 +116,7 @@ class UserModal extends PureComponent {
             <FormItem {...formItemLayout} label="年龄" hasFeedback>
               {getFieldDecorator('userAge', {
                 initialValue: userAge,
-                rules: [{ required: false, message: '请输入正确的年龄' }],
+                rules: [{ pattern: pattern.number.pattern, message: pattern.number.message }],
               })(<Input />)}
             </FormItem>
           </Form>

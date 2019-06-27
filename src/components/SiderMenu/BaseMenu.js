@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
-import { Menu, Icon } from 'antd';
+import { Menu, Icon, Badge } from 'antd';
 import Link from 'umi/link';
 import { urlToList } from '../_utils/pathTools';
 import { getMenuMatches } from './SiderMenuUtils';
@@ -47,6 +47,35 @@ export default class BaseMenu extends PureComponent {
       .filter(item => item.name && !item.hideInMenu)
       .map(item => this.getSubMenuOrItem(item))
       .filter(item => item);
+  };
+
+  getSideBar = (itemPath, icon, name, orderCount, supplierCount) => {
+    if (itemPath === '/backstage/Order-Form') {
+      return (
+        <span>
+          {icon}
+          <Badge count={orderCount} offset={[10, 0]}>
+            <span>{name}</span>
+          </Badge>
+        </span>
+      );
+    }
+    if (itemPath === '/backstage/hospital-apply') {
+      return (
+        <span>
+          {icon}
+          <Badge count={supplierCount} offset={[10, 0]}>
+            <span>{name}</span>
+          </Badge>
+        </span>
+      );
+    }
+    return (
+      <span>
+        {icon}
+        <span>{name}</span>
+      </span>
+    );
   };
 
   // Get the currently selected menu
@@ -102,7 +131,7 @@ export default class BaseMenu extends PureComponent {
         </a>
       );
     }
-    const { location, isMobile, onCollapse } = this.props;
+    const { location, isMobile, onCollapse, orderCount = 0, supplierCount = 0 } = this.props;
     return (
       <Link
         to={itemPath}
@@ -116,8 +145,7 @@ export default class BaseMenu extends PureComponent {
             : undefined
         }
       >
-        {icon}
-        <span>{name}</span>
+        {this.getSideBar(itemPath, icon, name, orderCount, supplierCount)}
       </Link>
     );
   };

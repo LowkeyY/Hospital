@@ -21,6 +21,9 @@ export default {
     list: [],
     nowPage: '1',
     pageSize: '10',
+    currentPage: 0,
+    payNumber: 0,
+    payList: [],
   },
   reducers: {
     updateState(state, { payload }) {
@@ -50,14 +53,43 @@ export default {
         message.error(msg || '请稍后再试');
       }
     },
-  },
-  subscriptions: {
-    setup({ dispatch, history }) {
-      return history.listen(({ pathname, query }) => {
-        if (pathname === '/backstage/Supplier-Status/hospitals') {
-          dispatch({ type: 'fetch', payload: query });
+    *queryPayMoney(_, { call, put }) {
+      const { data, success, msg } = yield call(Service.queryPayMoney);
+      if (success) {
+        yield put({
+          type: 'updateState',
+          payload: {
+            payNumber: data.annualFee,
+          },
+        });
+      } else {
+        message.error(msg || '请稍后再试');
+      }
+    },
+    *queryPayRecord({ payload }, { call, put }) {
+      const { data, success, msg } = yield call(Service.queryPayRecord, payload);
+      if (success) {
+        yield put({
+          type: 'updateState',
+          payload: {
+            payList: data,
+          },
+        });
+      } else {
+        message.error(msg || '请稍后再试');
+      }
+    },
+    *payChick({ payload }, { call }) {
+      const { data, success, msg } = yield call(Service.payChick, payload);
+      if (success) {
+        if (data) {
+          message.success('验证成功');
+        } else {
+          message.error('验证失败');
         }
-      });
+      } else {
+        message.error(msg || '请稍后再试');
+      }
     },
   },
 };

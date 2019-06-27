@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Modal, Form, Input } from 'antd';
-import IconPicker from '../../../components/Lowkey/IconPicker';
+import { pattern } from '../../../utils/config';
 
 const FormItem = Form.Item;
 
@@ -87,7 +87,7 @@ class MenuEditModal extends Component {
             >
               {getFieldDecorator('sort', {
                 initialValue: sort,
-                rules: [{ required: false, message: '只能输入数字' }],
+                rules: [{ pattern: pattern.number.pattern, message: pattern.number.message }],
               })(<Input />)}
             </FormItem>
             <FormItem {...formItemLayout} label="图标(选填)">

@@ -1,4 +1,5 @@
 import { message } from 'antd';
+import { routerRedux } from 'dva/router';
 import * as Service from '../services/index';
 
 const getList = arr => {
@@ -41,12 +42,11 @@ export default {
           ...state,
           list: state.list,
         };
-      } else {
-        return {
-          ...state,
-          list: state.list.concat(payload),
-        };
       }
+      return {
+        ...state,
+        list: state.list.concat(payload),
+      };
     },
     deleteRow(state, { payload }) {
       return {
@@ -70,8 +70,14 @@ export default {
       }
     },
     *addDistribution({ payload: values }, { call, put }) {
-      const { data, success, msg } = yield call(Service.addDistribution, values);
+      const { success, msg } = yield call(Service.addDistribution, values);
       if (success) {
+        yield put(
+          routerRedux.push({
+            pathname: '/backstage/Supplier-distribution-list',
+          })
+        );
+        message.success('配货成功');
       } else {
         message.error(msg || '请稍后再试');
       }

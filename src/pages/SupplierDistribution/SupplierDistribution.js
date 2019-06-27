@@ -10,6 +10,7 @@ let cloneKey = -1;
 const FormItem = Form.Item;
 const EditableContext = React.createContext();
 moment.locale('zh-cn');
+const dateFormat = 'YYYY-MM-DD';
 
 class EditableCell extends React.Component {
   getInput = () => {
@@ -18,13 +19,13 @@ class EditableCell extends React.Component {
       return <InputNumber />;
     }
     if (inputType === 'date') {
-      return <DatePicker />;
+      return <DatePicker format={dateFormat} />;
     }
     return <Input />;
   };
 
   render() {
-    const { editing, dataIndex, title, inputType, record, index, ...restProps } = this.props;
+    const { editing, dataIndex, title, inputType, record, ...restProps } = this.props;
     return (
       <EditableContext.Consumer>
         {form => {
@@ -40,7 +41,12 @@ class EditableCell extends React.Component {
                         message: `请输入${title}!`,
                       },
                     ],
-                    initialValue: record[dataIndex],
+                    initialValue:
+                      inputType === 'date'
+                        ? record[dataIndex]
+                          ? moment(record[dataIndex], dateFormat)
+                          : ''
+                        : record[dataIndex],
                   })(this.getInput())}
                 </FormItem>
               ) : (
@@ -71,6 +77,7 @@ class SupplierDistribution extends PureComponent {
         title: '',
         dataIndex: 'add',
         key: 'add',
+        fixed: 'left',
         render: (text, record) => (
           <Icon
             className={styles.add}
@@ -87,11 +94,23 @@ class SupplierDistribution extends PureComponent {
         title: '货品',
         dataIndex: 'goodsName',
         key: 'goodsName',
+        width: 250,
+        fixed: 'left',
+        render: (text, record) => (
+          <div style={{ wordWrap: 'break-word', wordBreak: 'break-all' }}>{text}</div>
+        ),
+      },
+      {
+        title: '产地',
+        dataIndex: 'isImportef',
+        key: 'isImportef',
+        render: (text, record) => (record.goodsBase.isImportef === '0' ? '进口' : '国产'),
       },
       {
         title: '厂家',
         dataIndex: 'manufacturer',
         key: 'manufacturer',
+        width: 150,
         render: (text, record) => record.goodsBase.manufacturer,
       },
       {
@@ -107,21 +126,21 @@ class SupplierDistribution extends PureComponent {
         render: (text, record) => record.goodsBase.goodsUnit,
       },
       {
+        title: '单价',
+        dataIndex: 'unitPrice',
+        key: 'unitPrice',
+        render: (text, record) => record.deptGoodsConfig.unitPrice,
+      },
+      {
         title: '数量',
         dataIndex: 'goodsNumber',
         key: 'goodsNumber',
-        width: '8%',
         editable: true,
-        // render: (text, record) => (
-        //   <InputNumber key={record.goodsId} min={1} defaultValue={record.goodsNumber}
-        //                onChange={(value) => this.changeNum(value, record)} />
-        // ),
       },
       {
         title: '批号',
         dataIndex: 'batchNumber',
         key: 'batchNumber',
-        width: '10%',
         editable: true,
         // render: (text, record) => (
         //   <Input onChange={(value) => this.changeNum(value, record)} />
@@ -131,7 +150,6 @@ class SupplierDistribution extends PureComponent {
         title: '有效期',
         dataIndex: 'termOfValidity',
         key: 'termOfValidity',
-        width: '15%',
         editable: true,
         // render: (text, record) => (
         //   <DatePicker />
@@ -141,27 +159,15 @@ class SupplierDistribution extends PureComponent {
         title: '灭菌日期',
         dataIndex: 'sterilizationDate',
         key: 'sterilizationDate',
-        width: '15%',
         editable: true,
         // render: (text, record) => (
         //   <DatePicker />
         // ),
       },
       {
-        title: '单价',
-        dataIndex: 'unitPrice',
-        key: 'unitPrice',
-        width: '8%',
-        editable: true,
-        // render: (text, record) => (
-        //   <InputNumber
-        //     formatter={value => `￥ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-        //   />
-        // ),
-      },
-      {
         title: '操作',
         key: 'operation',
+        fixed: 'right',
         render: (text, record) => {
           const { editingKey } = this.state;
           const editable = this.isEditing(record);
@@ -201,6 +207,11 @@ class SupplierDistribution extends PureComponent {
 
   componentDidMount() {}
 
+  deleteKey = arr => {
+    arr.map(item => delete item.detailId);
+    return arr;
+  };
+
   okHandler = () => {
     const {
       form,
@@ -213,7 +224,7 @@ class SupplierDistribution extends PureComponent {
       if (!err) {
         form.resetFields();
         const res = {
-          distributeData: JSON.stringify(list),
+          distributeData: JSON.stringify(this.deleteKey(list)),
           hospitalId: purchaseHospatisId,
           purchaseId,
           deptId,
@@ -265,6 +276,14 @@ class SupplierDistribution extends PureComponent {
     return 'text';
   };
 
+  getTotal = arr => {
+    let sum = 0;
+    arr.map(item => {
+      sum += item.goodsNumber * item.deptGoodsConfig.unitPrice || 0;
+    });
+    return sum;
+  };
+
   save(form, key) {
     const { dispatch } = this.props;
     form.validateFields((error, row) => {
@@ -288,14 +307,6 @@ class SupplierDistribution extends PureComponent {
     this.setState({ editingKey: key });
   }
 
-  getTotal = arr => {
-    let sum = 0;
-    arr.map(item => {
-      sum += item.goodsNumber * item.unitPrice || 0;
-    });
-    return sum;
-  };
-
   renderTitle = total => {
     return (
       <div className={styles.title}>
@@ -312,6 +323,7 @@ class SupplierDistribution extends PureComponent {
       sumbitting,
       form: { getFieldDecorator },
     } = this.props;
+    const { editingKey = '' } = this.state;
     const components = {
       body: {
         cell: EditableCell,
@@ -364,10 +376,16 @@ class SupplierDistribution extends PureComponent {
               columns={columns}
               loading={loading}
               pagination={false}
+              scroll={{ x: 1400 }}
             />
           </EditableContext.Provider>
           <div className={styles.button}>
-            <Button loading={sumbitting} type="primary" onClick={this.okHandler}>
+            <Button
+              disabled={editingKey !== ''}
+              loading={sumbitting}
+              type="primary"
+              onClick={this.okHandler}
+            >
               提交
             </Button>
           </div>

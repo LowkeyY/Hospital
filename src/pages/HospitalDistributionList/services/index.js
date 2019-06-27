@@ -2,8 +2,7 @@ import { stringify } from 'qs';
 import request from '@/utils/request';
 
 export async function queryList(params) {
-  const { nowPage = 1, pageSize = 10 } = params;
-  return request(`/api/distribute/hospitalDistribute?nowPage=${nowPage}&pageSize=${pageSize}`);
+  return request(`/api/distribute/hospitalDistribute?${stringify(params)}`);
 }
 
 export async function queryDetails(params) {

@@ -3,9 +3,9 @@ import { connect } from 'dva';
 import { Modal, Table } from 'antd';
 import styles from './OrderingModal.less';
 
-@connect(({ backstageOrder, loading }) => ({
-  backstageOrder,
-  orderLoading: loading.effects['backstageOrder/fetchDetails'],
+@connect(({ backstageDistribution, loading }) => ({
+  backstageDistribution,
+  orderLoading: loading.effects['backstageDistribution/fetchDetails'],
 }))
 class OrderingModal extends Component {
   constructor(props) {
@@ -37,7 +37,7 @@ class OrderingModal extends Component {
   render() {
     const {
       children,
-      backstageOrder: { detailsList },
+      backstageDistribution: { detailsList },
       orderLoading,
     } = this.props;
     const { visible } = this.state;

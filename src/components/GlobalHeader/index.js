@@ -1,10 +1,18 @@
 import React, { PureComponent } from 'react';
-import { Icon } from 'antd';
+import { Icon, Form, Modal, Input } from 'antd';
+import { connect } from 'dva';
 import Link from 'umi/link';
 import Debounce from 'lodash-decorators/debounce';
 import styles from './index.less';
+import md5 from 'md5';
 import RightContent from './RightContent';
 
+const FormItem = Form.Item;
+@connect(({ global, loading }) => ({
+  global,
+  confirmLoading: loading.effects['global/editorPass'],
+}))
+@Form.create()
 export default class GlobalHeader extends PureComponent {
   componentWillUnmount() {
     this.triggerResizeEvent.cancel();
@@ -25,8 +33,50 @@ export default class GlobalHeader extends PureComponent {
     this.triggerResizeEvent();
   };
 
+  okHandler = () => {
+    const { form, dispatch } = this.props;
+    const userId = localStorage.getItem('userId');
+    form.validateFields((err, values) => {
+      const { userPwd } = values;
+      if (!err) {
+        const res = {
+          userId,
+          userPwd: md5(userPwd),
+        };
+        dispatch({
+          type: 'global/editorPass',
+          payload: res,
+        });
+        form.resetFields();
+      }
+    });
+  };
+
+  handleCancel = e => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'global/updateState',
+      payload: {
+        pwdVisble: false,
+      },
+    });
+  };
+
   render() {
-    const { collapsed, isMobile, logo, isDesktop = false } = this.props;
+    const {
+      collapsed,
+      isMobile,
+      logo,
+      isDesktop = false,
+      global: { pwdVisble },
+      form,
+      confirmLoading,
+    } = this.props;
+    const { getFieldDecorator } = form;
+    const formItemLayout = {
+      labelCol: { span: 6 },
+      wrapperCol: { span: 14 },
+    };
     return (
       <div className={styles.header}>
         {isMobile && (
@@ -42,6 +92,20 @@ export default class GlobalHeader extends PureComponent {
           ''
         )}
         <RightContent {...this.props} />
+        <Modal
+          title="修改密码"
+          visible={pwdVisble}
+          onOk={this.okHandler}
+          confirmLoading={confirmLoading}
+          onCancel={this.handleCancel}
+        >
+          <FormItem {...formItemLayout} label="密码" hasFeedback>
+            {getFieldDecorator('userPwd', {
+              initialValue: '',
+              rules: [{ required: false, message: '请输入密码' }],
+            })(<Input />)}
+          </FormItem>
+        </Modal>
       </div>
     );
   }

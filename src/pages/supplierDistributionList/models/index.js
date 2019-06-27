@@ -23,6 +23,8 @@ export default {
     totalCount: '',
     nowPage: '1',
     pageSize: '10',
+    sum: '',
+    baseId: '',
   },
   reducers: {
     updateState(state, { payload }) {
@@ -46,6 +48,7 @@ export default {
             totalCount: data.totalCount,
             nowPage: data.nowPage,
             pageSize: data.pageSize,
+            sum: data.sum,
           },
         });
       } else {
@@ -65,12 +68,20 @@ export default {
         message.error(msg || '请稍后再试');
       }
     },
+    *editor({ payload }, { call, put, select }) {
+      const { baseId } = yield select(_ => _.supplierDistributionList);
+      const { success, msg } = yield call(Service.editor, payload);
+      if (success) {
+        yield put({ type: 'fetchDetails', payload: { baseId } });
+      } else {
+        message.error(msg || '请稍后再试');
+      }
+    },
   },
   subscriptions: {
     setup({ dispatch, history }) {
       return history.listen(({ pathname, query }) => {
         if (pathname === '/backstage/Supplier-distribution-list') {
-          dispatch({ type: 'fetch', payload: query });
         }
       });
     },

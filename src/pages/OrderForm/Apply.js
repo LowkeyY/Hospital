@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card, List, Tag } from 'antd';
+import { Card, List, Tag, Modal } from 'antd';
 
 import styles from './Order.less';
 
@@ -24,12 +24,19 @@ class CardList extends PureComponent {
       return <Tag color="green">审核通过</Tag>;
     }
     if (state === '2') {
-      return <Tag color="green">审核失败</Tag>;
+      return <Tag color="red">审核失败</Tag>;
     }
     if (state === '3') {
       return <Tag color="gray">已停用</Tag>;
     }
     return '-';
+  };
+
+  showReason = (reason = '未通过') => {
+    Modal.warning({
+      title: '由于以下原因本次审核未通过',
+      content: reason,
+    });
   };
 
   render() {
@@ -46,7 +53,11 @@ class CardList extends PureComponent {
           dataSource={hospitalList}
           renderItem={item => (
             <List.Item key={item.id}>
-              <Card hoverable className={styles.card}>
+              <Card
+                hoverable
+                className={styles.card}
+                onClick={item.state === '2' ? () => this.showReason(item.reason) : null}
+              >
                 <Card.Meta
                   title={<a>{item.hospitalBase.hospitalName}</a>}
                   description={

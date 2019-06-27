@@ -64,3 +64,11 @@ export async function blockUser(params) {
     },
   });
 }
+
+export async function queryCustomer(params) {
+  return request(`/api/hospital/getHospitalListBysls?${stringify(params)}`);
+}
+
+export async function supplier(params) {
+  return request(`/api/suppiler/findSuppilerByHospatilId?${stringify(params)}`);
+}

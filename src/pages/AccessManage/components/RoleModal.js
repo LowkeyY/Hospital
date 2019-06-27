@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { pattern } from '../../../utils/config';
 import { Modal, Form, Input } from 'antd';
 
 const FormItem = Form.Item;
@@ -77,7 +78,7 @@ class RoleModal extends Component {
             >
               {getFieldDecorator('sortId', {
                 initialValue: sortId,
-                rules: [{ required: false, message: '只能输入数字' }],
+                rules: [{ pattern: pattern.number.pattern, message: pattern.number.message }],
               })(<Input />)}
             </FormItem>
           </Form>

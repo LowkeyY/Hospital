@@ -56,6 +56,11 @@ export default [
         component: './SupplierManage/SupplierManage',
       },
       {
+        name: '供应商用户管理',
+        path: '/backstage/supplierManage-user',
+        component: './BackstageSupplierUser/BackstageSupplierUser',
+      },
+      {
         name: '供应商配货单',
         path: '/backstage/distribution-list',
         component: './BackstageDistribution/BackstageDistribution',
@@ -84,19 +89,24 @@ export default [
         routes: [
           {
             path: '/backstage/finance-manage',
-            redirect: '/backstage/finance-manage/salesman',
-          },
-          {
-            path: '/backstage/finance-manage/salesman',
-            name: '供应商账户',
-            component: './FinanceManage/SalesmanBill',
+            redirect: '/backstage/finance-manage/supplier',
           },
           {
             path: '/backstage/finance-manage/supplier',
-            name: '业务员提成',
+            name: '供应商账户',
             component: './FinanceManage/SupplierBill',
           },
+          {
+            path: '/backstage/finance-manage/salesman',
+            name: '业务员提成',
+            component: './FinanceManage/SalesmanBill',
+          },
         ],
+      },
+      {
+        name: '系统配置',
+        path: '/backstage/systemConfig',
+        component: './SystemConfig',
       },
       //客户端供应商
       {
@@ -142,7 +152,12 @@ export default [
         routes: [
           {
             path: '/backstage/Add-supplier',
-            redirect: '/backstage/Add-supplier/goodsList',
+            redirect: '/backstage/Add-supplier/fill-form',
+          },
+          {
+            path: '/backstage/Add-supplier/fill-form',
+            name: 'goodsList',
+            component: './SupplierNewDistribution/Step0',
           },
           {
             path: '/backstage/Add-supplier/goodsList',
@@ -201,6 +216,17 @@ export default [
           },
         ],
       },
+      {
+        name: '供应商医院科室',
+        path: '/backstage/Supplier-department',
+        component: './SupplierDepartment/SupplierDepartment',
+      },
+      {
+        name: '供应商医院科室货品',
+        path: '/backstage/Supplier-goods',
+        component: './SupplierGoods/SupplierGoods',
+      },
+
       //医院
       {
         name: '订货',
@@ -234,19 +260,80 @@ export default [
         ],
       },
       {
+        name: '库存管理',
+        path: '/backstage/hospital-dispose-manage',
+        component: './HospitalOrder/HospitalOrder',
+        routes: [
+          {
+            path: '/backstage/hospital-dispose-manage',
+            redirect: '/backstage/hospital-dispose-manage/inventory',
+          },
+          {
+            path: '/backstage/hospital-dispose-manage/inventory',
+            name: '库存清单',
+            component: './HospitalOrder/Inventory',
+          },
+          {
+            path: '/backstage/hospital-dispose-manage/shortage',
+            name: '缺货清单',
+            component: './HospitalOrder/Shortage',
+          },
+          {
+            path: '/backstage/hospital-dispose-manage/early-warning',
+            name: '有效期预警',
+            component: './HospitalOrder/EarlyWarning',
+          },
+          {
+            path: '/backstage/hospital-dispose-manage/overdue',
+            name: '过期清单',
+            component: './HospitalOrder/Overdue',
+          },
+        ],
+      },
+      {
+        name: '库存配置',
+        path: '/backstage/hospital-dispose',
+        component: './HospitalDisposeGoods/HospitalDisposeGoods',
+      },
+      {
         name: '订货单',
         path: '/backstage/hospital-ordering',
         component: './HospitalOrder/Ordering',
       },
       {
+        name: '一键补货',
+        path: '/backstage/hospital-quickordering',
+        component: './HospitalOrder/QuickOrdering',
+      },
+      {
         name: '入库',
         path: '/backstage/hospital-warehouseing',
-        component: './HospitalWarehousing/Warehousing',
+        routes: [
+          {
+            path: '/backstage/hospital-warehouseing',
+            component: './HospitalWarehousing/Warehousing',
+          },
+          {
+            path: '/backstage/hospital-warehouseing/record',
+            name: '入库记录',
+            component: './HospitalWarehousing/Record',
+          },
+        ],
       },
       {
         name: '出库',
         path: '/backstage/hospital-ex-warehouse',
-        component: './HospitalExWarehouse/ExWarehouse',
+        routes: [
+          {
+            path: '/backstage/hospital-ex-warehouse',
+            component: './HospitalExWarehouse/ExWarehouse',
+          },
+          {
+            path: '/backstage/hospital-ex-warehouse/record',
+            name: '出库记录',
+            component: './HospitalExWarehouse/Record',
+          },
+        ],
       },
       {
         name: '订货单查询',
@@ -269,17 +356,41 @@ export default [
         component: './HospitalApply/HospitalApply',
       },
       {
+        name: '我的医院',
+        path: '/backstage/Hospital-Account',
+        component: './HospitalAccount/HospitalAccount',
+      },
+      {
+        name: '报表统计',
+        path: '/backstage/Hospital-statistic',
+        routes: [
+          {
+            path: '/backstage/Hospital-statistic',
+            redirect: '/backstage/Hospital-statistic/amount',
+          },
+          {
+            path: '/backstage/Hospital-statistic/amount',
+            component: './HospitalStatistics/amount',
+          },
+          {
+            path: '/backstage/Hospital-statistic/loss',
+            component: './HospitalStatistics/loss',
+          },
+        ],
+      },
+      {
         name: 'result',
         icon: 'check-circle-o',
-        path: '/result',
+        path: '/backstage/result',
+        component: './Result',
         routes: [
           // result
           {
-            path: '/result/success',
+            path: '/backstage/result/success',
             name: 'success',
             component: './Result/Success',
           },
-          { path: '/result/fail', name: 'fail', component: './Result/Error' },
+          { path: '/backstage/result/fail', name: 'fail', component: './Result/Error' },
         ],
       },
       {

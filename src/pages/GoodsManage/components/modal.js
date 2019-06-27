@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Modal, Form, Input } from 'antd';
+import { pattern } from '../../../utils/config';
 
 const FormItem = Form.Item;
 
@@ -41,7 +42,7 @@ class GoodsModal extends Component {
     const { children, form, record } = this.props;
     const { visible } = this.state;
     const { getFieldDecorator } = form;
-    const { dirName = '', remark = '', sort = '' } = record;
+    const { dirName = '', remark = '', sort = '', update = false } = record;
     const formItemLayout = {
       labelCol: { span: 6 },
       wrapperCol: { span: 14 },
@@ -61,7 +62,7 @@ class GoodsModal extends Component {
               {getFieldDecorator('dirName', {
                 initialValue: dirName,
                 rules: [{ required: true, message: '货品分类不能为空' }],
-              })(<Input />)}
+              })(<Input disabled={!update && record.dirId} />)}
             </FormItem>
             <FormItem {...formItemLayout} label="说明(选填)" placeholder="填写说明" hasFeedback>
               {getFieldDecorator('remark', {
@@ -78,7 +79,7 @@ class GoodsModal extends Component {
             >
               {getFieldDecorator('sort', {
                 initialValue: sort,
-                rules: [{ required: false, message: '只能输入数字' }],
+                rules: [{ pattern: pattern.number.pattern, message: pattern.number.message }],
               })(<Input />)}
             </FormItem>
           </Form>

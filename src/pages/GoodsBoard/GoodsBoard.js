@@ -1,7 +1,7 @@
 import { connect } from 'dva';
 import React, { PureComponent } from 'react';
 import { Table, Button, Pagination, Switch, Tag, Icon, Modal } from 'antd';
-import { routerRedux } from 'dva/router';
+import SearchForm from './components/SearchForm';
 import GoodsBoardModal from './components/GoodsBoardModal';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import styles from './GoodsBoard.less';
@@ -13,7 +13,25 @@ const { confirm } = Modal;
   loading: loading.effects['goodsBoard/fetch'],
 }))
 class GoodsBoard extends PureComponent {
-  componentDidMount() {}
+  componentDidMount() {
+    const {
+      dispatch,
+      goodsBoard: { pageSize },
+    } = this.props;
+    dispatch({
+      type: 'global/queryClassify',
+    });
+    dispatch({
+      type: 'global/queryMethod',
+    });
+    dispatch({
+      type: 'goodsBoard/fetch',
+      payload: {
+        nowPage: 1,
+        pageSize,
+      },
+    });
+  }
 
   createHandler = values => {
     const { dispatch } = this.props;
@@ -41,21 +59,70 @@ class GoodsBoard extends PureComponent {
       dispatch,
       goodsBoard: { pageSize },
     } = this.props;
-    dispatch(
-      routerRedux.push({
-        pathname: '/backstage/goods-board',
-        query: { nowPage: page, pageSize },
-      })
-    );
+    dispatch({
+      type: 'goodsBoard/updateNowPage',
+      payload: {
+        nowPage: page,
+      },
+    });
+    dispatch({
+      type: 'goodsBoard/fetch',
+      payload: {
+        nowPage: page,
+        pageSize,
+      },
+    });
   };
 
   onShowSizeChange = (current, pageSize) => {
     const { dispatch } = this.props;
     dispatch({
+      type: 'goodsBoard/updatePageSize',
+      payload: {
+        pageSize,
+      },
+    });
+    dispatch({
       type: 'goodsBoard/fetch',
       payload: {
         nowPage: current,
         pageSize,
+      },
+    });
+  };
+
+  hanlerReset = () => {
+    const {
+      dispatch,
+      goodsBoard: { pageSize },
+    } = this.props;
+    dispatch({
+      type: 'goodsBoard/fetch',
+      payload: {
+        nowPage: 1,
+        pageSize,
+      },
+    });
+  };
+
+  handlerSearch = values => {
+    const {
+      dispatch,
+      goodsBoard: { pageSize },
+    } = this.props;
+    const { state = '', goodsNameCn = '', dirId = '', methodId = '' } = values;
+    const res = {
+      state: state === '' ? undefined : state,
+      goodsNameCn: goodsNameCn === '' ? undefined : goodsNameCn,
+      dirId: dirId === '' ? undefined : dirId,
+      methodId: methodId === '' ? undefined : methodId,
+      nowPage: 1,
+      pageSize,
+    };
+    dispatch({
+      type: 'goodsBoard/fetch',
+      payload: {
+        ...res,
       },
     });
   };
@@ -112,6 +179,7 @@ class GoodsBoard extends PureComponent {
         title: '中文名',
         dataIndex: 'goodsNameCn',
         key: 'goodsNameCn',
+        width: 200,
       },
       {
         title: '注册号',
@@ -149,6 +217,7 @@ class GoodsBoard extends PureComponent {
         title: '状态',
         dataIndex: 'state',
         key: 'state',
+        fixed: 'right',
         render: (text, record) => {
           if (record.state === '1') {
             return <Tag color="green">正常</Tag>;
@@ -162,11 +231,12 @@ class GoodsBoard extends PureComponent {
       {
         title: '操作',
         key: 'operation',
+        fixed: 'right',
         render: (text, record) => (
           <span className={styles.operation}>
             <GoodsBoardModal
               record={record}
-              isEdit={true}
+              isEdit
               onOk={values => this.editHandler(record.goodsId, values)}
             >
               <Icon className={styles.icon} type="edit" />
@@ -184,6 +254,9 @@ class GoodsBoard extends PureComponent {
     return (
       <PageHeaderWrapper>
         <div className={styles.commonList}>
+          <div className={styles.tableForm}>
+            <SearchForm onOk={this.handlerSearch} onReset={this.hanlerReset} />
+          </div>
           <div>
             <GoodsBoardModal record={{}} onOk={this.createHandler}>
               <Button type="primary" style={{ marginBottom: '10px' }}>
@@ -198,6 +271,7 @@ class GoodsBoard extends PureComponent {
             loading={loading}
             pagination={false}
             onChange={this.pageChangeHandler}
+            scroll={{ x: 1300 }}
           />
           <Pagination
             className="ant-table-pagination"

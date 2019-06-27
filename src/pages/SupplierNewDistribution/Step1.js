@@ -67,12 +67,19 @@ class Step1 extends React.PureComponent {
     });
   };
 
+  onPrev = () => {
+    router.push('/backstage/Add-supplier/fill-form');
+  };
+
   nextClick = () => {
+    router.push('/backstage/Add-supplier/distribution');
+  };
+
+  chickStatus = id => {
     const {
       addNewDistribution: { distributionList },
     } = this.props;
-
-    router.push('/backstage/Add-supplier/distribution');
+    return distributionList.find(item => item.goodsId === id);
   };
 
   render() {
@@ -98,6 +105,12 @@ class Step1 extends React.PureComponent {
         key: 'goodsNameCn',
       },
       {
+        title: '产地',
+        dataIndex: 'isImportef',
+        key: 'isImportef',
+        render: (text, record) => (record.isImportef === '0' ? '进口' : '国产'),
+      },
+      {
         title: '厂家',
         dataIndex: 'manufacturer',
         key: 'manufacturer',
@@ -113,11 +126,21 @@ class Step1 extends React.PureComponent {
         key: 'goodsUnit',
       },
       {
+        title: '单价',
+        dataIndex: 'unitPrice',
+        key: 'unitPrice',
+        render: (text, record) => record.deptGoodsConfig.unitPrice,
+      },
+      {
         title: '操作',
         key: 'operation',
         render: (text, record) => (
-          <Button type="primary" onClick={() => this.handlerAddClick(record)}>
-            添加
+          <Button
+            disabled={this.chickStatus(record.goodsId)}
+            type="primary"
+            onClick={() => this.handlerAddClick(record)}
+          >
+            {this.chickStatus(record.goodsId) ? '已添加' : '添加'}
           </Button>
         ),
       },
@@ -142,9 +165,14 @@ class Step1 extends React.PureComponent {
           showSizeChanger
           onShowSizeChange={this.onShowSizeChange}
         />
-        <Button disabled={distributionList.length === 0} type="primary" onClick={this.nextClick}>
-          下一步
-        </Button>
+        <div style={{ marginTop: '16px' }}>
+          <Button onClick={this.onPrev} style={{ marginRight: '20px' }}>
+            上一步
+          </Button>
+          <Button disabled={distributionList.length === 0} type="primary" onClick={this.nextClick}>
+            下一步
+          </Button>
+        </div>
       </Fragment>
     );
   }

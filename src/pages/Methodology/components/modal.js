@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Modal, Form, Input } from 'antd';
+import { pattern } from '../../../utils/config';
 
 const FormItem = Form.Item;
 
@@ -41,7 +42,7 @@ class MethodologyModal extends Component {
     const { children, form, record } = this.props;
     const { visible } = this.state;
     const { getFieldDecorator } = form;
-    const { methodName = '', sort = '' } = record;
+    const { methodName = '', sort = '', update = false } = record;
     const formItemLayout = {
       labelCol: { span: 6 },
       wrapperCol: { span: 14 },
@@ -51,7 +52,7 @@ class MethodologyModal extends Component {
       <span>
         <span onClick={this.showModelHandler}>{children}</span>
         <Modal
-          title={`${record.dirId ? '修改' : '新建'}方法学`}
+          title={`${record.methodId ? '修改' : '新建'}方法学`}
           visible={visible}
           onOk={this.okHandler}
           onCancel={this.hideModelHandler}
@@ -61,7 +62,7 @@ class MethodologyModal extends Component {
               {getFieldDecorator('methodName', {
                 initialValue: methodName,
                 rules: [{ required: true, message: '方法学不能为空' }],
-              })(<Input />)}
+              })(<Input disabled={!update && record.methodId} />)}
             </FormItem>
             <FormItem
               labelCol={{ span: 6 }}
@@ -72,7 +73,7 @@ class MethodologyModal extends Component {
             >
               {getFieldDecorator('sort', {
                 initialValue: sort,
-                rules: [{ required: false, message: '只能输入数字' }],
+                rules: [{ pattern: pattern.number.pattern, message: pattern.number.message }],
               })(<Input />)}
             </FormItem>
           </Form>

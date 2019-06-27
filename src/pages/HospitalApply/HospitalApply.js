@@ -1,8 +1,10 @@
 import { connect } from 'dva';
 import React, { PureComponent } from 'react';
 import { Table, Button, Pagination, Tag, Popconfirm } from 'antd';
-import { routerRedux } from 'dva/router';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
+import SearchForm from './components/SearchForm';
+import NoPassModal from './components/noPassModal';
+import DetailsModal from './components/DetailsModal';
 import styles from './HospitalApply.less';
 
 const pop = {
@@ -17,7 +19,19 @@ const pop = {
   loading: loading.effects['hospitalApply/fetch'],
 }))
 class HospitalApply extends PureComponent {
-  componentDidMount() {}
+  componentDidMount() {
+    const {
+      dispatch,
+      hospitalApply: { pageSize },
+    } = this.props;
+    dispatch({
+      type: 'hospitalApply/fetch',
+      payload: {
+        nowPage: 1,
+        pageSize,
+      },
+    });
+  }
 
   handlerPassClick = applyId => {
     const { dispatch } = this.props;
@@ -29,12 +43,13 @@ class HospitalApply extends PureComponent {
     });
   };
 
-  handlerFailClick = applyId => {
+  handlerFailClick = (applyId, values) => {
     const { dispatch } = this.props;
     dispatch({
       type: 'hospitalApply/fail',
       payload: {
         applyId,
+        ...values,
       },
     });
   };
@@ -50,7 +65,6 @@ class HospitalApply extends PureComponent {
   };
 
   handlerLockClick = applyId => {
-    console.log(22);
     const { dispatch } = this.props;
     dispatch({
       type: 'hospitalApply/block',
@@ -65,16 +79,29 @@ class HospitalApply extends PureComponent {
       dispatch,
       hospitalApply: { pageSize },
     } = this.props;
-    dispatch(
-      routerRedux.push({
-        pathname: '/backstage/hospital-apply',
-        query: { nowPage: page, pageSize },
-      })
-    );
+    dispatch({
+      type: 'hospitalApply/updateNowPage',
+      payload: {
+        nowPage: page,
+      },
+    });
+    dispatch({
+      type: 'hospitalApply/fetch',
+      payload: {
+        nowPage: page,
+        pageSize,
+      },
+    });
   };
 
   onShowSizeChange = (current, pageSize) => {
     const { dispatch } = this.props;
+    dispatch({
+      type: 'hospitalApply/updatePageSize',
+      payload: {
+        pageSize,
+      },
+    });
     dispatch({
       type: 'hospitalApply/fetch',
       payload: {
@@ -97,15 +124,15 @@ class HospitalApply extends PureComponent {
               审核通过
             </Button>
           </Popconfirm>
-          <Popconfirm title={pop.fail} onConfirm={() => this.handlerFailClick(applyId)}>
+          <NoPassModal onOk={values => this.handlerFailClick(applyId, values)}>
             <Button
               type="primary"
               size="small"
               style={{ background: '#e53935', borderColor: '#e53935' }}
             >
-              审核失败
+              审核不通过
             </Button>
-          </Popconfirm>
+          </NoPassModal>
         </div>
       );
     }
@@ -120,13 +147,13 @@ class HospitalApply extends PureComponent {
     }
     if (state === '2') {
       return (
-        <Popconfirm title={pop.fail} onConfirm={() => this.handlerFailClick(applyId)}>
+        <Popconfirm title={pop.pass} onConfirm={() => this.handlerPassClick(applyId)}>
           <Button
             type="primary"
             size="small"
-            style={{ background: '#e53935', borderColor: '#e53935' }}
+            style={{ background: '#00e676', borderColor: '#00e676' }}
           >
-            审核失败
+            审核通过
           </Button>
         </Popconfirm>
       );
@@ -142,6 +169,54 @@ class HospitalApply extends PureComponent {
       );
     }
     return '-';
+  };
+
+  handlerDetailsClick = suppilerId => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'hospitalApply/queryDetails',
+      payload: {
+        suppilerId,
+      },
+    });
+  };
+
+  hanlerReset = () => {
+    const {
+      dispatch,
+      hospitalApply: { pageSize, deptId },
+    } = this.props;
+    dispatch({
+      type: 'hospitalApply/fetch',
+      payload: {
+        nowPage: 1,
+        pageSize,
+        deptId,
+      },
+    });
+  };
+
+  handlerSearch = values => {
+    const {
+      dispatch,
+      hospitalApply: { pageSize, deptId },
+    } = this.props;
+    const { state = '', suppilerId = '', queryBeginDate = '', queryEndDate = '' } = values;
+    const res = {
+      state: state === '' ? undefined : state,
+      suppilerId: suppilerId === '' ? undefined : suppilerId,
+      queryEndDate: queryEndDate === '' ? undefined : queryEndDate,
+      queryBeginDate: queryBeginDate === '' ? undefined : queryBeginDate,
+      nowPage: 1,
+      pageSize,
+      deptId,
+    };
+    dispatch({
+      type: 'hospitalApply/fetch',
+      payload: {
+        ...res,
+      },
+    });
   };
 
   render() {
@@ -200,6 +275,18 @@ class HospitalApply extends PureComponent {
         },
       },
       {
+        title: '查看详情',
+        key: 'details',
+        render: (text, record) => (
+          <DetailsModal>
+            <Button size="small" onClick={() => this.handlerDetailsClick(record.suppilerId)}>
+              详情
+            </Button>
+            ,
+          </DetailsModal>
+        ),
+      },
+      {
         title: '操作',
         key: 'operation',
         render: (text, record) => this.getButtons(record.state, record.applyId),
@@ -208,6 +295,9 @@ class HospitalApply extends PureComponent {
     return (
       <PageHeaderWrapper>
         <div className={styles.commonList}>
+          <div className={styles.tableForm}>
+            <SearchForm onOk={this.handlerSearch} onReset={this.hanlerReset} />
+          </div>
           <Table
             columns={columns}
             dataSource={list}
